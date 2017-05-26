@@ -25,7 +25,53 @@ const APP_ICON_SIZE_SMALL = 48;
 
 const SHELL_KEYBINDINGS_SCHEMA = 'org.gnome.shell.keybindings';
 
-let popupList = [];
+let popupList;
+
+const PopupList = new Lang.Class({
+    Name: 'PopupList',
+
+    _init : function() {
+	this._popupList = [];
+	this.create();
+    },
+
+    create: function() {
+        let activeWs = global.screen.get_active_workspace();
+	this._popupList.push(activeWs.index())
+
+        for (let i = 0; i < global.screen.n_workspaces; i++) {
+	    if (i === activeWs.index())
+		continue;
+	    this._popupList.push(i);
+	}
+	this._popupList.reverse();
+    },
+
+    update: function() {
+	if (this._popupList.length > global.screen.n_workspaces) {
+		let index = this._popupList.indexOf(global.screen.n_workspaces);
+		if (index > -1) {
+		    this._popupList.splice(index, 1);
+		}
+	} 
+
+	if (this._popupList.length < global.screen.n_workspaces) {
+		this._popupList.reverse();
+		this._popupList.push(global.screen.n_workspaces - 1);
+		this._popupList.reverse();
+	}
+    },
+
+    moveToTop: function(workspaceIndex) {
+	let index = this._popupList.indexOf(workspaceIndex);
+
+	if (index > -1) {
+	    this._popupList.splice(index, 1);
+	}
+	
+	this._popupList.push(workspaceIndex);
+    },
+});
 
 const WorkSpace= new Lang.Class({
     Name: 'WorkSpace',
@@ -40,6 +86,8 @@ const WorkSpace= new Lang.Class({
     },
     
     _switchWorkspace : function(shellwm, from, to, direction) {
+	popupList.update();
+
         if (this._workspaceSwitcherPopup != null)
             this._workspaceSwitcherPopup.destroy();
 
@@ -84,9 +132,12 @@ const WorkSpacePopup = new Lang.Class({
         return Clutter.EVENT_STOP;
     },
 
-
     _finish: function() {
-        Main.wm.actionMoveWorkspace(this._switcherList.workspaces[this._selectedIndex]);
+        Main.wm.actionMoveWorkspace(this._switcherList.selectWorkspaces[this._selectedIndex]);
+
+        let activeWs = global.screen.get_active_workspace();
+	popupList.moveToTop(activeWs.index());
+	//this._switcherList.selectWorkspaces[this._selectedIndex].index();
 
         this.parent();
     }
@@ -106,23 +157,18 @@ const WorkSpaceList = new Lang.Class({
         this.icons = [];
 
 	this.workspaces = this.getWorkSpace();
+	this.selectWorkspaces = [];
 
-        let activeWs = global.screen.get_active_workspace();
-	popupList.push(activeWs.index())
+	let popup = popupList._popupList.slice();
         for (let i = 0; i < global.screen.n_workspaces; i++) {
-	    if (i === activeWs.index())
-		continue;
-	    popupList.push(i);
-	}
-	print("wxg: popupList: ", popupList);
+            let ws_index = popup.pop();
+	    this.selectWorkspaces[i] = this.workspaces[ws_index];
 
-        for (let i = 0; i < global.screen.n_workspaces; i++) {
-            let icon = new WindowIcon(popupList.pop());
+            let icon = new WindowIcon(ws_index);
 
             this.addItem(icon.actor, icon.label);
             this.icons.push(icon);
         }
-	print("wxg: popupList: ", popupList);
     },
 
     getWorkSpace: function() {
@@ -182,7 +228,6 @@ const WindowIcon = new Lang.Class({
         this._icon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
 
         this.actor.add(this._icon, { x_fill: false, y_fill: false } );
-        //this.label = new St.Label({ text: workspace_index });
         this.label = new St.Label({ text: "WorkSpace " + String(workspace_index + 1) });
 
         let tracker = Shell.WindowTracker.get_default();
@@ -195,7 +240,6 @@ const WindowIcon = new Lang.Class({
 
 	size = WINDOW_PREVIEW_SIZE;
 
-	print("wxg: typeof workspace_index: ", typeof(workspace_index));
 	let metaWorkspace = global.screen.get_workspace_by_index(workspace_index);
 	let thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
 	print("wxg: scaleFactor: ", scaleFactor);
@@ -203,8 +247,7 @@ const WindowIcon = new Lang.Class({
 	this._icon.add_actor(thumbnail.actor);
 
 	//if (this.app)
-	//    this._icon.add_actor(this._createAppIcon(this.app,
-	//						     APP_ICON_SIZE_SMALL));
+	this._icon.add_actor(this._createAppIcon(null, APP_ICON_SIZE_SMALL));
 
 	/*
         switch (mode) {
@@ -232,9 +275,9 @@ const WindowIcon = new Lang.Class({
     },
 
     _createAppIcon: function(app, size) {
-        let appIcon = app ? app.create_icon_texture(size)
-                          : new St.Icon({ icon_name: 'icon-missing',
-                                          icon_size: size });
+        //let appIcon = app ? app.create_icon_texture(size)
+        let appIcon = new St.Icon({ icon_name: 'icon-missing',
+                                    icon_size: size });
         appIcon.x_expand = appIcon.y_expand = true;
         appIcon.x_align = appIcon.y_align = Clutter.ActorAlign.END;
 
@@ -249,9 +292,9 @@ function init() {
 function enable() {
 	print("wxg: switch workspace enable");
 	let ws = new WorkSpace();
+
+	popupList = new PopupList();
 }
 
 function disable() {
-        //let shellwm =  global.window_manager;
-        //shellwm.connect('switch-workspace', Lang.bind(this, this._switchWorkspace));
 }
