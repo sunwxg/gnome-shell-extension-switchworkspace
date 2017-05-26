@@ -1,0 +1,16 @@
+{
+  "_generated": "xiaoguang wang",
+  "description": "Switch workspace like switching windows",
+  "name": "Switch Workspace",
+  "original-authors": [
+    "sun.wxg@gmail.com"
+  ],
+  "shell-version": [
+    "3.20",
+    "3.22",
+    "3.24"
+  ],
+  "url": "",
+  "uuid": "switchWorkSpace@sun.wxg@gmail.com", 
+  "version": 1
+}
