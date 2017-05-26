@@ -108,21 +108,21 @@ const WorkSpaceList = new Lang.Class({
 	this.workspaces = this.getWorkSpace();
 
         let activeWs = global.screen.get_active_workspace();
-	let activeIndex = activeWs.index();
+	popupList.push(activeWs.index())
+        for (let i = 0; i < global.screen.n_workspaces; i++) {
+	    if (i === activeWs.index())
+		continue;
+	    popupList.push(i);
+	}
+	print("wxg: popupList: ", popupList);
 
-        for (let i = activeIndex; i < global.screen.n_workspaces; i++) {
-            let icon = new WindowIcon(i);
+        for (let i = 0; i < global.screen.n_workspaces; i++) {
+            let icon = new WindowIcon(popupList.pop());
 
             this.addItem(icon.actor, icon.label);
             this.icons.push(icon);
         }
-
-        for (let i = 0; i < activeIndex; i++) {
-            let icon = new WindowIcon(i);
-
-            this.addItem(icon.actor, icon.label);
-            this.icons.push(icon);
-        }
+	print("wxg: popupList: ", popupList);
     },
 
     getWorkSpace: function() {
@@ -195,7 +195,7 @@ const WindowIcon = new Lang.Class({
 
 	size = WINDOW_PREVIEW_SIZE;
 
-	print("wxg: n workspace: ", global.screen.n_workspaces);
+	print("wxg: typeof workspace_index: ", typeof(workspace_index));
 	let metaWorkspace = global.screen.get_workspace_by_index(workspace_index);
 	let thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
 	print("wxg: scaleFactor: ", scaleFactor);
