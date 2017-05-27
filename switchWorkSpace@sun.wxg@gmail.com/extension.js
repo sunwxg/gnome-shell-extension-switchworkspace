@@ -12,18 +12,8 @@ const AltTab = imports.ui.altTab;
 const SwitcherPopup = imports.ui.switcherPopup;
 const WorkspaceThumbnail = imports.ui.workspaceThumbnail 
 
-
-const AppIconMode = {
-    THUMBNAIL_ONLY: 1,
-    APP_ICON_ONLY: 2,
-    BOTH: 3,
-};
-
 const WINDOW_PREVIEW_SIZE = 128;
-const APP_ICON_SIZE = 96;
 const APP_ICON_SIZE_SMALL = 48;
-
-const SHELL_KEYBINDINGS_SCHEMA = 'org.gnome.shell.keybindings';
 
 let popupList;
 
@@ -48,6 +38,12 @@ const PopupList = new Lang.Class({
     },
 
     update: function() {
+        let activeWs = global.screen.get_active_workspace();
+	let activeWsIndex = activeWs.index();
+	if (activeWsIndex != this._popupList[this._popupList.length - 1]) {
+	    this.moveToTop(activeWsIndex);
+	}
+
 	if (this._popupList.length > global.screen.n_workspaces) {
 		let index = this._popupList.indexOf(global.screen.n_workspaces);
 		if (index > -1) {
@@ -137,7 +133,6 @@ const WorkSpacePopup = new Lang.Class({
 
         let activeWs = global.screen.get_active_workspace();
 	popupList.moveToTop(activeWs.index());
-	//this._switcherList.selectWorkspaces[this._selectedIndex].index();
 
         this.parent();
     }
@@ -161,10 +156,10 @@ const WorkSpaceList = new Lang.Class({
 
 	let popup = popupList._popupList.slice();
         for (let i = 0; i < global.screen.n_workspaces; i++) {
-            let ws_index = popup.pop();
-	    this.selectWorkspaces[i] = this.workspaces[ws_index];
+            let workspace_index = popup.pop();
+	    this.selectWorkspaces[i] = this.workspaces[workspace_index];
 
-            let icon = new WindowIcon(ws_index);
+            let icon = new WindowIcon(workspace_index);
 
             this.addItem(icon.actor, icon.label);
             this.icons.push(icon);
@@ -193,9 +188,11 @@ const WorkSpaceList = new Lang.Class({
         this.parent(actor, forWidth, alloc);
 
         let spacing = this.actor.get_theme_node().get_padding(St.Side.BOTTOM);
-        let [labelMin, labelNat] = this._label.get_preferred_height(-1);
-        alloc.min_size += labelMin + spacing;
-        alloc.natural_size += labelNat + spacing;
+        //let [labelMin, labelNat] = this._label.get_preferred_height(-1);
+        //alloc.min_size += labelMin + spacing;
+        alloc.min_size += spacing;
+        //alloc.natural_size += labelNat + spacing;
+        alloc.natural_size += spacing;
     },
 
     _allocateTop: function(actor, box, flags) {
@@ -230,48 +227,24 @@ const WindowIcon = new Lang.Class({
         this.actor.add(this._icon, { x_fill: false, y_fill: false } );
         this.label = new St.Label({ text: "WorkSpace " + String(workspace_index + 1) });
 
-        let tracker = Shell.WindowTracker.get_default();
-
-        let size;
-
         this._icon.destroy_all_children();
 
-        let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+        this._porthole = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
 
-	size = WINDOW_PREVIEW_SIZE;
+	let scale = Math.min(1.0, WINDOW_PREVIEW_SIZE / this._porthole.width,
+				WINDOW_PREVIEW_SIZE / this._porthole.height);
 
 	let metaWorkspace = global.screen.get_workspace_by_index(workspace_index);
 	let thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
-	print("wxg: scaleFactor: ", scaleFactor);
-        thumbnail.actor.set_scale(0.125, 0.125);
+
+        thumbnail.actor.set_scale(scale, scale);
 	this._icon.add_actor(thumbnail.actor);
 
 	//if (this.app)
 	this._icon.add_actor(this._createAppIcon(null, APP_ICON_SIZE_SMALL));
 
-	/*
-        switch (mode) {
-            case AppIconMode.THUMBNAIL_ONLY:
-                size = WINDOW_PREVIEW_SIZE;
-                this._icon.add_actor(_createWindowClone(mutterWindow, size * scaleFactor));
-                break;
-
-            case AppIconMode.BOTH:
-                size = WINDOW_PREVIEW_SIZE;
-                this._icon.add_actor(_createWindowClone(mutterWindow, size * scaleFactor));
-
-                if (this.app)
-                    this._icon.add_actor(this._createAppIcon(this.app,
-                                                             APP_ICON_SIZE_SMALL));
-                break;
-
-            case AppIconMode.APP_ICON_ONLY:
-                size = APP_ICON_SIZE;
-                this._icon.add_actor(this._createAppIcon(this.app, size));
-        }
-	*/
-
-        this._icon.set_size(size * scaleFactor, size * scaleFactor);
+        let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+        this._icon.set_size(WINDOW_PREVIEW_SIZE * scaleFactor, WINDOW_PREVIEW_SIZE * scaleFactor);
     },
 
     _createAppIcon: function(app, size) {
