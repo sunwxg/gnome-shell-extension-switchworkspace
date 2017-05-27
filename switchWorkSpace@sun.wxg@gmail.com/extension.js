@@ -224,7 +224,8 @@ const WindowIcon = new Lang.Class({
                                         vertical: true });
         this._icon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
 
-        this.actor.add(this._icon, { x_fill: false, y_fill: false } );
+        this.actor.add(this._icon, { x_fill: false,
+				     y_fill: false });
         this.label = new St.Label({ text: "WorkSpace " + String(workspace_index + 1) });
 
         this._icon.destroy_all_children();
@@ -244,7 +245,8 @@ const WindowIcon = new Lang.Class({
 	this._icon.add_actor(this._createAppIcon(null, APP_ICON_SIZE_SMALL));
 
         let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-        this._icon.set_size(WINDOW_PREVIEW_SIZE * scaleFactor, WINDOW_PREVIEW_SIZE * scaleFactor);
+
+        this._icon.set_size(this._porthole.width * scale * scaleFactor, this._porthole.height * scale * scaleFactor);
     },
 
     _createAppIcon: function(app, size) {
