@@ -11,11 +11,96 @@ const Main = imports.ui.main;
 const AltTab = imports.ui.altTab;
 const SwitcherPopup = imports.ui.switcherPopup;
 const WorkspaceThumbnail = imports.ui.workspaceThumbnail 
+const Extension = imports.misc.extensionUtils.getCurrentExtension();
+
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Convenience = Me.imports.convenience;
 
 const WINDOW_PREVIEW_SIZE = 128;
 const APP_ICON_SIZE_SMALL = 48;
 
+const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
+const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
+
+let workspace;
 let popupList;
+
+const WorkSpace= new Lang.Class({
+    Name: 'WorkSpace',
+
+    _init : function() {
+        this._shellwm =  global.window_manager;
+        this._workspaceSwitcherPopup = null;
+
+	this.removeAltAboveTab();
+	this.bindingKey();
+    },
+
+    bindingKey: function() {
+        this._settings = Convenience.getSettings(SCHEMA_NAME);
+        this._settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, ['<Alt>Above_Tab']);
+
+        let ModeType = Shell.hasOwnProperty('ActionMode') ?
+            Shell.ActionMode : Shell.KeyBindingMode;
+
+        Main.wm.addKeybinding(SETTING_KEY_SWITCH_WORKSPACE,
+            			this._settings,
+				Meta.KeyBindingFlags.NONE,
+                                ModeType.ALL,
+        	                Lang.bind(this, this._switchWorkspace));
+    },
+
+    unbindingKey: function() {
+        Main.wm.removeKeybinding(SETTING_KEY_SWITCH_WORKSPACE);
+    },
+
+    removeAltAboveTab: function() {
+        let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
+        let oldValue = settings.get_strv('switch-group');
+	let newValue = [];
+
+        for (let i = 0; i < oldValue.length; i++) {
+		if (oldValue[i] === '<Alt>Above_Tab')
+		    continue; 
+		newValue.push(oldValue[i]);
+        }
+        settings.set_strv('switch-group', newValue);
+    },
+    
+    addAltAboveTab: function() {
+        let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
+        let oldValue = settings.get_strv('switch-group');
+
+	let included = false;
+        for (let i = 0; i < oldValue.length; i++) {
+		if (oldValue[i] === '<Alt>Above_Tab') {
+		    included = true;
+		    break; 
+		}
+        }
+	oldValue.push('<Alt>Above_Tab');
+        settings.set_strv('switch-group', oldValue);
+    },
+
+    _switchWorkspace : function(shellwm, from, to, direction) {
+	popupList.update();
+
+        if (this._workspaceSwitcherPopup != null)
+            this._workspaceSwitcherPopup.destroy();
+
+        let tabPopup = new WorkSpacePopup();
+
+        if (!tabPopup.show(false, 'switch-windows', 8)) {
+            tabPopup.destroy();
+	}
+    },
+
+    destroy: function() {
+	workspace.unbindingKey();
+	workspace.addAltAboveTab();
+    }
+});
 
 const PopupList = new Lang.Class({
     Name: 'PopupList',
@@ -66,32 +151,6 @@ const PopupList = new Lang.Class({
 	}
 	
 	this._popupList.push(workspaceIndex);
-    },
-});
-
-const WorkSpace= new Lang.Class({
-    Name: 'WorkSpace',
-
-    _init : function() {
-        this._shellwm =  global.window_manager;
-        this._workspaceSwitcherPopup = null;
-
-        Main.wm.setCustomKeybindingHandler('switch-to-workspace-down',
-                                        Shell.ActionMode.NORMAL,
-                                        Lang.bind(this, this._switchWorkspace));
-    },
-    
-    _switchWorkspace : function(shellwm, from, to, direction) {
-	popupList.update();
-
-        if (this._workspaceSwitcherPopup != null)
-            this._workspaceSwitcherPopup.destroy();
-
-        let tabPopup = new WorkSpacePopup();
-
-        if (!tabPopup.show(false, 'switch-windows', 8)) {
-            tabPopup.destroy();
-	}
     },
 });
 
@@ -226,7 +285,7 @@ const WindowIcon = new Lang.Class({
 
         this.actor.add(this._icon, { x_fill: false,
 				     y_fill: false });
-        this.label = new St.Label({ text: "WorkSpace " + String(workspace_index + 1) });
+        this.label = new St.Label({ text: "WorkSpace" + " " + String(workspace_index + 1) });
 
         this._icon.destroy_all_children();
 
@@ -242,11 +301,12 @@ const WindowIcon = new Lang.Class({
 	this._icon.add_actor(thumbnail.actor);
 
 	//if (this.app)
-	this._icon.add_actor(this._createAppIcon(null, APP_ICON_SIZE_SMALL));
+	//this._icon.add_actor(this._createAppIcon(null, APP_ICON_SIZE_SMALL));
 
         let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
 
-        this._icon.set_size(this._porthole.width * scale * scaleFactor, this._porthole.height * scale * scaleFactor);
+        this._icon.set_size(this._porthole.width * scale * scaleFactor,
+			    this._porthole.height * scale * scaleFactor);
     },
 
     _createAppIcon: function(app, size) {
@@ -266,10 +326,12 @@ function init() {
 
 function enable() {
 	print("wxg: switch workspace enable");
-	let ws = new WorkSpace();
+
+	workspace = new WorkSpace();
 
 	popupList = new PopupList();
 }
 
 function disable() {
+	workspace.destroy();
 }
