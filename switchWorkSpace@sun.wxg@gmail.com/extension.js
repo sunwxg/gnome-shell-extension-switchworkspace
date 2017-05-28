@@ -5,6 +5,7 @@ const GLib = imports.gi.GLib;
 const Meta = imports.gi.Meta;
 const Clutter = imports.gi.Clutter;
 const St = imports.gi.St;
+const Gtk = imports.gi.Gtk;
 
 const WindowManager = imports.ui.windowManager.WindowManager;
 const Main = imports.ui.main;
