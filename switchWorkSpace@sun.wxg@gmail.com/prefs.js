@@ -45,84 +45,84 @@ const switchWorkSpaceWidget = new Lang.Class({
         this.orientation = Gtk.Orientation.VERTICAL;
 
         let label = new Gtk.Label({ label: 'Switch Workspace Keybinding', use_markup: true,
-                                 halign: Gtk.Align.START });
-	this.attach(label, 1, 1, 2, 1);
+            halign: Gtk.Align.START });
+        this.attach(label, 1, 1, 2, 1);
 
         this._settings = Convenience.getSettings(SCHEMA_NAME);
 
-	let box = this.keybindingBox(this._settings);
+        let box = this.keybindingBox(this._settings);
 
         addKeybinding(box.model, this._settings, SETTING_KEY_SWITCH_WORKSPACE,
-                      "switch workspace");
+            "switch workspace");
 
-	this.attach(box, 1, 2, 2, 2);
+        this.attach(box, 1, 2, 2, 2);
     },
-    
+
     keybindingBox: function(SettingsSchema) {
-	    let model = new Gtk.ListStore();
+        let model = new Gtk.ListStore();
 
-	    model.set_column_types(
-		    [GObject.TYPE_STRING, // COLUMN_ID
-		     GObject.TYPE_STRING, // COLUMN_DESCRIPTION
-		     GObject.TYPE_INT,    // COLUMN_KEY
-		     GObject.TYPE_INT]);  // COLUMN_MODS
+        model.set_column_types(
+            [GObject.TYPE_STRING, // COLUMN_ID
+                GObject.TYPE_STRING, // COLUMN_DESCRIPTION
+                GObject.TYPE_INT,    // COLUMN_KEY
+                GObject.TYPE_INT]);  // COLUMN_MODS
 
-	    let treeView = new Gtk.TreeView({model: model, 
-					    headers_visible: false,
-					    hexpand: true
-					    });
+        let treeView = new Gtk.TreeView({model: model, 
+            headers_visible: false,
+            hexpand: true
+        });
 
-	    let column, renderer;
+        let column, renderer;
 
-	    renderer = new Gtk.CellRendererText();
+        renderer = new Gtk.CellRendererText();
 
-	    column = new Gtk.TreeViewColumn({expand: true});
-	    column.pack_start(renderer, true);
-	    column.add_attribute(renderer, "text", COLUMN_DESCRIPTION);
+        column = new Gtk.TreeViewColumn({expand: true});
+        column.pack_start(renderer, true);
+        column.add_attribute(renderer, "text", COLUMN_DESCRIPTION);
 
-	    treeView.append_column(column);
+        treeView.append_column(column);
 
-	    renderer = new Gtk.CellRendererAccel();
-	    renderer.accel_mode = Gtk.CellRendererAccelMode.GTK;
-	    renderer.editable = true;
+        renderer = new Gtk.CellRendererAccel();
+        renderer.accel_mode = Gtk.CellRendererAccelMode.GTK;
+        renderer.editable = true;
 
-	    renderer.connect("accel-edited",
-		    function (renderer, path, key, mods, hwCode) {
-			let [ok, iter] = model.get_iter_from_string(path);
-			if(!ok)
-			    return;
+        renderer.connect("accel-edited",
+            function (renderer, path, key, mods, hwCode) {
+                let [ok, iter] = model.get_iter_from_string(path);
+                if(!ok)
+                    return;
 
-			// Update the UI.
-			model.set(iter, [COLUMN_KEY, COLUMN_MODS], [key, mods]);
+                // Update the UI.
+                model.set(iter, [COLUMN_KEY, COLUMN_MODS], [key, mods]);
 
-			// Update the stored setting.
-			let id = model.get_value(iter, COLUMN_ID);
-			let accelString = Gtk.accelerator_name(key, mods);
-			SettingsSchema.set_strv(id, [accelString]);
-		    });
+                // Update the stored setting.
+                let id = model.get_value(iter, COLUMN_ID);
+                let accelString = Gtk.accelerator_name(key, mods);
+                SettingsSchema.set_strv(id, [accelString]);
+            });
 
-	    renderer.connect("accel-cleared",
-		    function (renderer, path) {
-			let [ok, iter] = model.get_iter_from_string(path);
-			if(!ok)
-			    return;
+        renderer.connect("accel-cleared",
+            function (renderer, path) {
+                let [ok, iter] = model.get_iter_from_string(path);
+                if(!ok)
+                    return;
 
-			// Update the UI.
-			model.set(iter, [COLUMN_KEY, COLUMN_MODS], [0, 0]);
+                // Update the UI.
+                model.set(iter, [COLUMN_KEY, COLUMN_MODS], [0, 0]);
 
-			// Update the stored setting.
-			let id = model.get_value(iter, COLUMN_ID);
-			SettingsSchema.set_strv(id, []);
-		    });
+                // Update the stored setting.
+                let id = model.get_value(iter, COLUMN_ID);
+                SettingsSchema.set_strv(id, []);
+            });
 
-	    column = new Gtk.TreeViewColumn();
-	    column.pack_end(renderer, false);
-	    column.add_attribute(renderer, "accel-key", COLUMN_KEY);
-	    column.add_attribute(renderer, "accel-mods", COLUMN_MODS);
+        column = new Gtk.TreeViewColumn();
+        column.pack_end(renderer, false);
+        column.add_attribute(renderer, "accel-key", COLUMN_KEY);
+        column.add_attribute(renderer, "accel-mods", COLUMN_MODS);
 
-	    treeView.append_column(column);
+        treeView.append_column(column);
 
-	    return treeView;
+        return treeView;
     },
 });
 
@@ -132,7 +132,6 @@ function addKeybinding(model, settings, id, description) {
 
     let row = model.insert(100);
     model.set(row,
-            [COLUMN_ID, COLUMN_DESCRIPTION, COLUMN_KEY, COLUMN_MODS],
-            [id,        description,        key,        mods]);
+        [COLUMN_ID, COLUMN_DESCRIPTION, COLUMN_KEY, COLUMN_MODS],
+        [id,        description,        key,        mods]);
 }
-

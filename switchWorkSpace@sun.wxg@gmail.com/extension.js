@@ -24,17 +24,14 @@ const APP_ICON_SIZE_SMALL = 48;
 const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
 
-let workspace;
-let popupList;
-
 const WorkSpace= new Lang.Class({
     Name: 'WorkSpace',
 
     _init : function() {
         this._shellwm =  global.window_manager;
 
-	this.removeAltAboveTab();
-	this.bindingKey();
+        this.removeAltAboveTab();
+        this.bindingKey();
     },
 
     bindingKey: function() {
@@ -45,10 +42,10 @@ const WorkSpace= new Lang.Class({
             Shell.ActionMode : Shell.KeyBindingMode;
 
         Main.wm.addKeybinding(SETTING_KEY_SWITCH_WORKSPACE,
-            			this._settings,
-				Meta.KeyBindingFlags.NONE,
+                                this._settings,
+                                Meta.KeyBindingFlags.NONE,
                                 ModeType.ALL,
-        	                Lang.bind(this, this._switchWorkspace));
+                                Lang.bind(this, this._switchWorkspace));
     },
 
     unbindingKey: function() {
@@ -58,45 +55,45 @@ const WorkSpace= new Lang.Class({
     removeAltAboveTab: function() {
         let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
         let oldValue = settings.get_strv('switch-group');
-	let newValue = [];
+        let newValue = [];
 
         for (let i = 0; i < oldValue.length; i++) {
-		if (oldValue[i] === '<Alt>Above_Tab')
-		    continue; 
-		newValue.push(oldValue[i]);
+            if (oldValue[i] === '<Alt>Above_Tab')
+                continue; 
+            newValue.push(oldValue[i]);
         }
         settings.set_strv('switch-group', newValue);
     },
-    
+
     addAltAboveTab: function() {
         let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
         let oldValue = settings.get_strv('switch-group');
 
-	let included = false;
+        let included = false;
         for (let i = 0; i < oldValue.length; i++) {
-		if (oldValue[i] === '<Alt>Above_Tab') {
-		    included = true;
-		    break; 
-		}
+            if (oldValue[i] === '<Alt>Above_Tab') {
+                included = true;
+                break; 
+            }
         }
-	if (!included)
-		oldValue.push('<Alt>Above_Tab');
+        if (!included)
+            oldValue.push('<Alt>Above_Tab');
         settings.set_strv('switch-group', oldValue);
     },
 
     _switchWorkspace : function(display, screen, window, binding) {
-	popupList.update();
+        popupList.update();
 
         let tabPopup = new WorkSpacePopup();
 
         if (!tabPopup.show(binding.is_reversed(), binding.get_name(), binding.get_mask())) {
             tabPopup.destroy();
-	}
+        }
     },
 
     destroy: function() {
-	workspace.unbindingKey();
-	workspace.addAltAboveTab();
+        workspace.unbindingKey();
+        workspace.addAltAboveTab();
     }
 });
 
@@ -104,51 +101,51 @@ const PopupList = new Lang.Class({
     Name: 'PopupList',
 
     _init : function() {
-	this._popupList = [];
-	this.create();
+        this._popupList = [];
+        this.create();
     },
 
     create: function() {
         let activeWs = global.screen.get_active_workspace();
-	this._popupList.push(activeWs.index())
+        this._popupList.push(activeWs.index())
 
         for (let i = 0; i < global.screen.n_workspaces; i++) {
-	    if (i === activeWs.index())
-		continue;
-	    this._popupList.push(i);
-	}
-	this._popupList.reverse();
+            if (i === activeWs.index())
+                continue;
+            this._popupList.push(i);
+        }
+        this._popupList.reverse();
     },
 
     update: function() {
         let activeWs = global.screen.get_active_workspace();
-	let activeWsIndex = activeWs.index();
-	if (activeWsIndex != this._popupList[this._popupList.length - 1]) {
-	    this.moveToTop(activeWsIndex);
-	}
+        let activeWsIndex = activeWs.index();
+        if (activeWsIndex != this._popupList[this._popupList.length - 1]) {
+            this.moveToTop(activeWsIndex);
+        }
 
-	if (this._popupList.length > global.screen.n_workspaces) {
-		let index = this._popupList.indexOf(global.screen.n_workspaces);
-		if (index > -1) {
-		    this._popupList.splice(index, 1);
-		}
-	} 
+        if (this._popupList.length > global.screen.n_workspaces) {
+            let index = this._popupList.indexOf(global.screen.n_workspaces);
+            if (index > -1) {
+                this._popupList.splice(index, 1);
+            }
+        } 
 
-	if (this._popupList.length < global.screen.n_workspaces) {
-		this._popupList.reverse();
-		this._popupList.push(global.screen.n_workspaces - 1);
-		this._popupList.reverse();
-	}
+        if (this._popupList.length < global.screen.n_workspaces) {
+            this._popupList.reverse();
+            this._popupList.push(global.screen.n_workspaces - 1);
+            this._popupList.reverse();
+        }
     },
 
     moveToTop: function(workspaceIndex) {
-	let index = this._popupList.indexOf(workspaceIndex);
+        let index = this._popupList.indexOf(workspaceIndex);
 
-	if (index > -1) {
-	    this._popupList.splice(index, 1);
-	}
-	
-	this._popupList.push(workspaceIndex);
+        if (index > -1) {
+            this._popupList.splice(index, 1);
+        }
+
+        this._popupList.push(workspaceIndex);
     },
 });
 
@@ -166,28 +163,13 @@ const WorkSpacePopup = new Lang.Class({
     _keyPressHandler: function(keysym, action) {
         this._select(this._next());
         return Clutter.EVENT_STOP;
-
-        if (action == Meta.KeyBindingAction.SWITCH_WINDOWS) {
-            this._select(this._next());
-        } else if (action == Meta.KeyBindingAction.SWITCH_WINDOWS_BACKWARD) {
-            this._select(this._previous());
-        } else {
-            if (keysym == Clutter.Left)
-                this._select(this._previous());
-            else if (keysym == Clutter.Right)
-                this._select(this._next());
-            else
-                return Clutter.EVENT_PROPAGATE;
-        }
-
-        return Clutter.EVENT_STOP;
     },
 
     _finish: function() {
         Main.wm.actionMoveWorkspace(this._switcherList.selectWorkspaces[this._selectedIndex]);
 
         let activeWs = global.screen.get_active_workspace();
-	popupList.moveToTop(activeWs.index());
+        popupList.moveToTop(activeWs.index());
 
         this.parent();
     }
@@ -201,18 +183,18 @@ const WorkSpaceList = new Lang.Class({
         this.parent(true);
 
         this._label = new St.Label({ x_align: Clutter.ActorAlign.CENTER,
-                                     y_align: Clutter.ActorAlign.CENTER });
+                                    y_align: Clutter.ActorAlign.CENTER });
         this.actor.add_actor(this._label);
 
         this.icons = [];
 
-	this.workspaces = this.getWorkSpace();
-	this.selectWorkspaces = [];
+        this.workspaces = this.getWorkSpace();
+        this.selectWorkspaces = [];
 
-	let popup = popupList._popupList.slice();
+        let popup = popupList._popupList.slice();
         for (let i = 0; i < global.screen.n_workspaces; i++) {
             let workspace_index = popup.pop();
-	    this.selectWorkspaces[i] = this.workspaces[workspace_index];
+            this.selectWorkspaces[i] = this.workspaces[workspace_index];
 
             let icon = new WindowIcon(workspace_index);
 
@@ -223,20 +205,20 @@ const WorkSpaceList = new Lang.Class({
 
     getWorkSpace: function() {
         let activeWs = global.screen.get_active_workspace();
-	let activeIndex = activeWs.index();
-	let ws = [];
+        let activeIndex = activeWs.index();
+        let ws = [];
 
-	ws[activeIndex] = activeWs;
+        ws[activeIndex] = activeWs;
 
-	for (let i = activeIndex - 1; i >= 0; i--) {
+        for (let i = activeIndex - 1; i >= 0; i--) {
             ws[i] = ws[i + 1].get_neighbor(Meta.MotionDirection.UP);
-	}
+        }
 
-	for (let i = activeIndex + 1; i < global.screen.n_workspaces; i++) {
+        for (let i = activeIndex + 1; i < global.screen.n_workspaces; i++) {
             ws[i] = ws[i - 1].get_neighbor(Meta.MotionDirection.DOWN);
-	}
-	
-	return ws;
+        }
+
+        return ws;
     },
 
     _getPreferredHeight: function(actor, forWidth, alloc) {
@@ -277,30 +259,29 @@ const WindowIcon = new Lang.Class({
                                         vertical: true });
         this._icon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
 
-        this.actor.add(this._icon, { x_fill: false,
-				     y_fill: false });
+        this.actor.add(this._icon, { x_fill: false, y_fill: false });
         this.label = new St.Label({ text: "WorkSpace" + " " + String(workspace_index + 1) });
 
         this._icon.destroy_all_children();
 
         this._porthole = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
 
-	let scale = Math.min(1.0, WINDOW_PREVIEW_SIZE / this._porthole.width,
-				WINDOW_PREVIEW_SIZE / this._porthole.height);
+        let scale = Math.min(1.0, WINDOW_PREVIEW_SIZE / this._porthole.width,
+                                WINDOW_PREVIEW_SIZE / this._porthole.height);
 
-	let metaWorkspace = global.screen.get_workspace_by_index(workspace_index);
-	let thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
+        let metaWorkspace = global.screen.get_workspace_by_index(workspace_index);
+        let thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
 
         thumbnail.actor.set_scale(scale, scale);
-	this._icon.add_actor(thumbnail.actor);
+        this._icon.add_actor(thumbnail.actor);
 
-	//if (this.app)
-	//this._icon.add_actor(this._createAppIcon(null, APP_ICON_SIZE_SMALL));
+        //if (this.app)
+        //this._icon.add_actor(this._createAppIcon(null, APP_ICON_SIZE_SMALL));
 
         let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
 
         this._icon.set_size(this._porthole.width * scale * scaleFactor,
-			    this._porthole.height * scale * scaleFactor);
+                            this._porthole.height * scale * scaleFactor);
     },
 
     _createAppIcon: function(app, size) {
@@ -317,11 +298,14 @@ const WindowIcon = new Lang.Class({
 function init() {
 }
 
+let workspace;
+let popupList;
+
 function enable() {
-	workspace = new WorkSpace();
-	popupList = new PopupList();
+    workspace = new WorkSpace();
+    popupList = new PopupList();
 }
 
 function disable() {
-	workspace.destroy();
+    workspace.destroy();
 }
