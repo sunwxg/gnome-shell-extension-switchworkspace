@@ -285,17 +285,16 @@ const WindowIcon = new Lang.Class({
 
     _createNumberIcon: function(number) {
         let icon = new St.Widget({ x_expand: true,
-				y_expand: true,
-				x_align:  Clutter.ActorAlign.END,
-				y_align:  Clutter.ActorAlign.END });
+                                   y_expand: true,
+                                   x_align:  Clutter.ActorAlign.END,
+                                   y_align:  Clutter.ActorAlign.END });
 
         let box = new St.BoxLayout({ style_class: 'number-window',
-                                       vertical: true });
-
+                                     vertical: true });
         icon.add_actor(box);
 
         let label = new St.Label({ style_class: 'number-label',
-                                     text: number.toString() });
+                                   text: number.toString() });
         box.add(label);
 
         return icon;
