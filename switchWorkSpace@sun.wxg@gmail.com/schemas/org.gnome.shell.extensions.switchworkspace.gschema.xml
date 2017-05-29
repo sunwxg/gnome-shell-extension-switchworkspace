@@ -3,7 +3,7 @@
       path="/org/gnome/shell/extensions/switchWorkSpace/">
 
     <key name="switch-workspace" type="as">
-      <default><![CDATA[['<Alt>`']]]></default>
+      <default><![CDATA[['<Alt>Above_Tab']]]></default>
       <summary>Key to switch workspace</summary>
       <description>
       </description>
