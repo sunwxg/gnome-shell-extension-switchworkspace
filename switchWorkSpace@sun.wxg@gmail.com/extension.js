@@ -32,7 +32,6 @@ const WorkSpace= new Lang.Class({
 
     _init : function() {
         this._shellwm =  global.window_manager;
-        this._workspaceSwitcherPopup = null;
 
 	this.removeAltAboveTab();
 	this.bindingKey();
@@ -80,19 +79,17 @@ const WorkSpace= new Lang.Class({
 		    break; 
 		}
         }
-	oldValue.push('<Alt>Above_Tab');
+	if (!included)
+		oldValue.push('<Alt>Above_Tab');
         settings.set_strv('switch-group', oldValue);
     },
 
-    _switchWorkspace : function(shellwm, from, to, direction) {
+    _switchWorkspace : function(display, screen, window, binding) {
 	popupList.update();
-
-        if (this._workspaceSwitcherPopup != null)
-            this._workspaceSwitcherPopup.destroy();
 
         let tabPopup = new WorkSpacePopup();
 
-        if (!tabPopup.show(false, 'switch-windows', 8)) {
+        if (!tabPopup.show(binding.is_reversed(), binding.get_name(), binding.get_mask())) {
             tabPopup.destroy();
 	}
     },
@@ -161,9 +158,7 @@ const WorkSpacePopup = new Lang.Class({
 
     _init: function() {
         this.parent();
-        //this._settings = new Gio.Settings({ schema_id: 'org.gnome.shell.window-switcher' });
 
-        //let mode = this._settings.get_enum('app-icon-mode');
         this._switcherList = new WorkSpaceList();
         this._items = this._switcherList.icons;
     },
@@ -248,10 +243,8 @@ const WorkSpaceList = new Lang.Class({
         this.parent(actor, forWidth, alloc);
 
         let spacing = this.actor.get_theme_node().get_padding(St.Side.BOTTOM);
-        //let [labelMin, labelNat] = this._label.get_preferred_height(-1);
-        //alloc.min_size += labelMin + spacing;
+
         alloc.min_size += spacing;
-        //alloc.natural_size += labelNat + spacing;
         alloc.natural_size += spacing;
     },
 
@@ -322,14 +315,10 @@ const WindowIcon = new Lang.Class({
 });
 
 function init() {
-	print("wxg: switch workspace init");
 }
 
 function enable() {
-	print("wxg: switch workspace enable");
-
 	workspace = new WorkSpace();
-
 	popupList = new PopupList();
 }
 
