@@ -1,0 +1,15 @@
+.number-window {
+  text-align: center;
+  font-weight: bold;
+  spacing: 1em;
+  margin: 3px;
+  border-radius: 0.6em;
+  min-width: 48px;
+  min-height: 48px; 
+  background-color: rgba(66, 72, 73, 1);
+  color: #eeeeec;
+}
+
+.number-window .number-label {
+    font-size: 3em;
+}

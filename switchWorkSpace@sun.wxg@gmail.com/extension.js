@@ -196,7 +196,7 @@ const WorkSpaceList = new Lang.Class({
             let workspace_index = popup.pop();
             this.selectWorkspaces[i] = this.workspaces[workspace_index];
 
-            let icon = new WindowIcon(workspace_index);
+            let icon = new WindowIcon(Number(workspace_index));
 
             this.addItem(icon.actor, icon.label);
             this.icons.push(icon);
@@ -254,13 +254,14 @@ const WindowIcon = new Lang.Class({
     Name: 'WindowIcon',
 
     _init: function(workspace_index) {
+        this.label = new St.Label({ text: "WorkSpace" + " " + String(workspace_index + 1) });
 
         this.actor = new St.BoxLayout({ style_class: 'alt-tab-app',
                                         vertical: true });
+
         this._icon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
 
-        this.actor.add(this._icon, { x_fill: false, y_fill: false });
-        this.label = new St.Label({ text: "WorkSpace" + " " + String(workspace_index + 1) });
+        this.actor.add(this._icon, { x_fill: false, y_fill: false});
 
         this._icon.destroy_all_children();
 
@@ -271,27 +272,33 @@ const WindowIcon = new Lang.Class({
 
         let metaWorkspace = global.screen.get_workspace_by_index(workspace_index);
         let thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
-
         thumbnail.actor.set_scale(scale, scale);
+
         this._icon.add_actor(thumbnail.actor);
 
-        //if (this.app)
-        //this._icon.add_actor(this._createAppIcon(null, APP_ICON_SIZE_SMALL));
+        this._icon.add_actor(this._createNumberIcon(workspace_index + 1));
 
         let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
 
-        this._icon.set_size(this._porthole.width * scale * scaleFactor,
-                            this._porthole.height * scale * scaleFactor);
+        this._icon.set_size(WINDOW_PREVIEW_SIZE * scaleFactor, WINDOW_PREVIEW_SIZE * scaleFactor);
     },
 
-    _createAppIcon: function(app, size) {
-        //let appIcon = app ? app.create_icon_texture(size)
-        let appIcon = new St.Icon({ icon_name: 'icon-missing',
-                                    icon_size: size });
-        appIcon.x_expand = appIcon.y_expand = true;
-        appIcon.x_align = appIcon.y_align = Clutter.ActorAlign.END;
+    _createNumberIcon: function(number) {
+        let icon = new St.Widget({ x_expand: true,
+				y_expand: true,
+				x_align:  Clutter.ActorAlign.END,
+				y_align:  Clutter.ActorAlign.END });
 
-        return appIcon;
+        let box = new St.BoxLayout({ style_class: 'number-window',
+                                       vertical: true });
+
+        icon.add_actor(box);
+
+        let label = new St.Label({ style_class: 'number-label',
+                                     text: number.toString() });
+        box.add(label);
+
+        return icon;
     }
 });
 
