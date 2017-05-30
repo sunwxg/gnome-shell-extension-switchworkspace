@@ -102,7 +102,6 @@ const PopupList = new Lang.Class({
 
     _init : function() {
         this._popupList = [];
-        this.create();
     },
 
     create: function() {
@@ -118,24 +117,28 @@ const PopupList = new Lang.Class({
     },
 
     update: function() {
-        let activeWs = global.screen.get_active_workspace();
-        let activeWsIndex = activeWs.index();
-        if (activeWsIndex != this._popupList[this._popupList.length - 1]) {
-            this.moveToTop(activeWsIndex);
-        }
+	if (this._popupList.length === 0) {
+		this.create();
+	} else {
+		let activeWs = global.screen.get_active_workspace();
+		let activeWsIndex = activeWs.index();
+		if (activeWsIndex != this._popupList[this._popupList.length - 1]) {
+		    this.moveToTop(activeWsIndex);
+		}
 
-        if (this._popupList.length > global.screen.n_workspaces) {
-            let index = this._popupList.indexOf(global.screen.n_workspaces);
-            if (index > -1) {
-                this._popupList.splice(index, 1);
-            }
-        } 
+		if (this._popupList.length > global.screen.n_workspaces) {
+		    let index = this._popupList.indexOf(global.screen.n_workspaces);
+		    if (index > -1) {
+			this._popupList.splice(index, 1);
+		    }
+		}
 
-        if (this._popupList.length < global.screen.n_workspaces) {
-            this._popupList.reverse();
-            this._popupList.push(global.screen.n_workspaces - 1);
-            this._popupList.reverse();
-        }
+		if (this._popupList.length < global.screen.n_workspaces) {
+		    this._popupList.reverse();
+		    this._popupList.push(global.screen.n_workspaces - 1);
+		    this._popupList.reverse();
+		}
+	}
     },
 
     moveToTop: function(workspaceIndex) {
