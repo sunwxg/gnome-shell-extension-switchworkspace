@@ -3,6 +3,9 @@
   font-weight: bold;
   spacing: 1em;
   margin: 3px;
+  padding: 2px;
+  border: 1px;
+  border-color: #747467;
   border-radius: 0.6em;
   min-width: 48px;
   min-height: 48px; 
