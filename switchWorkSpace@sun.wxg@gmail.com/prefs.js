@@ -29,6 +29,44 @@ function buildPrefsWidget() {
     return widget;
 }
 
+function bindingAltAboveTab() {
+        let settings = Convenience.getSettings(SCHEMA_NAME);
+        let value = settings.get_strv(SETTING_KEY_SWITCH_WORKSPACE);
+	if (value.length === 0) {
+		settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, ['<Alt>Above_Tab']);
+		removeAltAboveTab();
+	}
+}
+
+function removeAltAboveTab() {
+        let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
+        let oldValue = settings.get_strv('switch-group');
+        let newValue = [];
+
+        for (let i = 0; i < oldValue.length; i++) {
+            if (oldValue[i] === '<Alt>Above_Tab')
+                continue; 
+            newValue.push(oldValue[i]);
+        }
+        settings.set_strv('switch-group', newValue);
+}
+
+function addAltAboveTab() {
+        let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
+        let oldValue = settings.get_strv('switch-group');
+
+        let included = false;
+        for (let i = 0; i < oldValue.length; i++) {
+            if (oldValue[i] === '<Alt>Above_Tab') {
+                included = true;
+                break; 
+            }
+        }
+        if (!included)
+            oldValue.push('<Alt>Above_Tab');
+        settings.set_strv('switch-group', oldValue);
+}
+
 const switchWorkSpaceWidget = new Lang.Class({
     Name: 'switchWorkSpaceWidget',
     GTypeName: 'switchWorkSpaceWidget',
@@ -92,6 +130,7 @@ const switchWorkSpaceWidget = new Lang.Class({
                 if(!ok)
                     return;
 
+		addAltAboveTab();
                 // Update the UI.
                 model.set(iter, [COLUMN_KEY, COLUMN_MODS], [key, mods]);
 
@@ -113,6 +152,8 @@ const switchWorkSpaceWidget = new Lang.Class({
                 // Update the stored setting.
                 let id = model.get_value(iter, COLUMN_ID);
                 SettingsSchema.set_strv(id, []);
+		removeAltAboveTab();
+		bindingAltAboveTab();
             });
 
         column = new Gtk.TreeViewColumn();
