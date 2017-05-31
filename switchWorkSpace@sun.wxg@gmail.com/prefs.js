@@ -30,14 +30,14 @@ function buildPrefsWidget() {
 }
 
 function bindingAltAboveTab() {
-        let settings = Convenience.getSettings(SCHEMA_NAME);
-        let value = settings.get_strv(SETTING_KEY_SWITCH_WORKSPACE);
-        if (value.length === 0 ) {
-            settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, ['<Alt>Above_Tab']);
-            removeAltAboveTab();
-        } else if (value[0] === '<Alt>Above_Tab') {
-            removeAltAboveTab();
-        }
+    let settings = Convenience.getSettings(SCHEMA_NAME);
+    let value = settings.get_strv(SETTING_KEY_SWITCH_WORKSPACE);
+    if (value.length === 0 ) {
+        settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, ['<Alt>Above_Tab']);
+        removeAltAboveTab();
+    } else if (value[0] === '<Alt>Above_Tab') {
+        removeAltAboveTab();
+    }
 }
 
 function removeAltAboveTab() {
@@ -85,7 +85,7 @@ const switchWorkSpaceWidget = new Lang.Class({
         this.orientation = Gtk.Orientation.VERTICAL;
 
         let label = new Gtk.Label({ label: 'Switch Workspace Keybinding', use_markup: true,
-            halign: Gtk.Align.START });
+                                    halign: Gtk.Align.START });
         this.attach(label, 1, 1, 2, 1);
 
         this._settings = Convenience.getSettings(SCHEMA_NAME);
@@ -93,7 +93,7 @@ const switchWorkSpaceWidget = new Lang.Class({
         let box = this.keybindingBox(this._settings);
 
         addKeybinding(box.model, this._settings, SETTING_KEY_SWITCH_WORKSPACE,
-            "switch workspace");
+                        "switch workspace");
 
         this.attach(box, 1, 2, 2, 2);
     },
@@ -132,7 +132,8 @@ const switchWorkSpaceWidget = new Lang.Class({
                 if(!ok)
                     return;
 
-		addAltAboveTab();
+                addAltAboveTab();
+
                 // Update the UI.
                 model.set(iter, [COLUMN_KEY, COLUMN_MODS], [key, mods]);
 
@@ -154,8 +155,9 @@ const switchWorkSpaceWidget = new Lang.Class({
                 // Update the stored setting.
                 let id = model.get_value(iter, COLUMN_ID);
                 SettingsSchema.set_strv(id, []);
-		removeAltAboveTab();
-		bindingAltAboveTab();
+
+                removeAltAboveTab();
+                bindingAltAboveTab();
             });
 
         column = new Gtk.TreeViewColumn();
