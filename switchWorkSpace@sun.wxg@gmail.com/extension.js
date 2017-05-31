@@ -17,6 +17,7 @@ const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
+const Prefs = Me.imports.prefs;
 
 const WINDOW_PREVIEW_SIZE = 128;
 const APP_ICON_SIZE_SMALL = 48;
@@ -30,19 +31,17 @@ const WorkSpace= new Lang.Class({
     _init : function() {
         this._shellwm =  global.window_manager;
 
-        this.removeAltAboveTab();
+	Prefs.bindingAltAboveTab();
         this.bindingKey();
     },
 
     bindingKey: function() {
-        this._settings = Convenience.getSettings(SCHEMA_NAME);
-        this._settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, ['<Alt>Above_Tab']);
-
+        let settings = Convenience.getSettings(SCHEMA_NAME);
         let ModeType = Shell.hasOwnProperty('ActionMode') ?
-            Shell.ActionMode : Shell.KeyBindingMode;
+                       Shell.ActionMode : Shell.KeyBindingMode;
 
         Main.wm.addKeybinding(SETTING_KEY_SWITCH_WORKSPACE,
-                                this._settings,
+                                settings,
                                 Meta.KeyBindingFlags.NONE,
                                 ModeType.ALL,
                                 Lang.bind(this, this._switchWorkspace));
@@ -50,35 +49,6 @@ const WorkSpace= new Lang.Class({
 
     unbindingKey: function() {
         Main.wm.removeKeybinding(SETTING_KEY_SWITCH_WORKSPACE);
-    },
-
-    removeAltAboveTab: function() {
-        let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
-        let oldValue = settings.get_strv('switch-group');
-        let newValue = [];
-
-        for (let i = 0; i < oldValue.length; i++) {
-            if (oldValue[i] === '<Alt>Above_Tab')
-                continue; 
-            newValue.push(oldValue[i]);
-        }
-        settings.set_strv('switch-group', newValue);
-    },
-
-    addAltAboveTab: function() {
-        let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
-        let oldValue = settings.get_strv('switch-group');
-
-        let included = false;
-        for (let i = 0; i < oldValue.length; i++) {
-            if (oldValue[i] === '<Alt>Above_Tab') {
-                included = true;
-                break; 
-            }
-        }
-        if (!included)
-            oldValue.push('<Alt>Above_Tab');
-        settings.set_strv('switch-group', oldValue);
     },
 
     _switchWorkspace : function(display, screen, window, binding) {
@@ -93,7 +63,7 @@ const WorkSpace= new Lang.Class({
 
     destroy: function() {
         workspace.unbindingKey();
-        workspace.addAltAboveTab();
+        Prefs.addAltAboveTab();
     }
 });
 
