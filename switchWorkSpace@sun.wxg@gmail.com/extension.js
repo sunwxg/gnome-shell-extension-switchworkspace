@@ -41,10 +41,10 @@ const WorkSpace= new Lang.Class({
                        Shell.ActionMode : Shell.KeyBindingMode;
 
         Main.wm.addKeybinding(SETTING_KEY_SWITCH_WORKSPACE,
-                                settings,
-                                Meta.KeyBindingFlags.NONE,
-                                ModeType.ALL,
-                                Lang.bind(this, this._switchWorkspace));
+                              settings,
+                              Meta.KeyBindingFlags.NONE,
+                              ModeType.ALL,
+                              Lang.bind(this, this._switchWorkspace));
     },
 
     unbindingKey: function() {
@@ -76,7 +76,7 @@ const PopupList = new Lang.Class({
 
     create: function() {
         let activeWs = global.screen.get_active_workspace();
-        this._popupList.push(activeWs.index())
+        this._popupList.push(activeWs.index());
 
         for (let i = 0; i < global.screen.n_workspaces; i++) {
             if (i === activeWs.index())
