@@ -270,20 +270,29 @@ const WindowIcon = new Lang.Class({
 
         this._porthole = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
 
-        let scale = Math.min(1.0, WINDOW_PREVIEW_SIZE / this._porthole.width,
-                                WINDOW_PREVIEW_SIZE / this._porthole.height);
+        let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
+        let windowSize = WINDOW_PREVIEW_SIZE * scaleFactor;
+
+        let scale = Math.min(1.0, windowSize / this._porthole.width,
+                                windowSize / this._porthole.height);
 
         let metaWorkspace = global.screen.get_workspace_by_index(workspace_index);
         let thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
         thumbnail.actor.set_scale(scale, scale);
 
-        this._icon.add_actor(thumbnail.actor);
+        let workspaceIcon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
+
+        workspaceIcon.add_actor(thumbnail.actor);
+        if (this._porthole.width >= this._porthole.height)
+            workspaceIcon.set_size(windowSize, windowSize * (this._porthole.height / this._porthole.width));
+        else
+            workspaceIcon.set_size(windowSize * (this._porthole.width / this._porthole.height), windowSize);
+
+        this._icon.add_actor(workspaceIcon);
 
         this._icon.add_actor(this._createNumberIcon(workspace_index + 1));
 
-        let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
-
-        this._icon.set_size(WINDOW_PREVIEW_SIZE * scaleFactor, WINDOW_PREVIEW_SIZE * scaleFactor);
+        this._icon.set_size(windowSize, windowSize);
     },
 
     _createNumberIcon: function(number) {

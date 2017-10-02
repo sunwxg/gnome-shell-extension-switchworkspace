@@ -1,18 +1,18 @@
 .number-window {
   text-align: center;
   font-weight: bold;
-  spacing: 1em;
-  margin: 3px;
-  padding: 2px;
+  spacing: 0em;
+  margin: 2px;
+  padding: 1px;
   border: 1px;
   border-color: #747467;
   border-radius: 0.6em;
-  min-width: 48px;
-  min-height: 48px; 
+  min-width: 40px;
+  min-height: 40px; 
   background-color: rgba(66, 72, 73, 1);
   color: #eeeeec;
 }
 
 .number-window .number-label {
-    font-size: 2.5em;
+    font-size: 2.0em;
 }
