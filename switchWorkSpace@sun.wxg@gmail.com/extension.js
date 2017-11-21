@@ -11,7 +11,7 @@ const WindowManager = imports.ui.windowManager.WindowManager;
 const Main = imports.ui.main;
 const AltTab = imports.ui.altTab;
 const SwitcherPopup = imports.ui.switcherPopup;
-const WorkspaceThumbnail = imports.ui.workspaceThumbnail 
+const WorkspaceThumbnail = imports.ui.workspaceThumbnail;
 const Extension = imports.misc.extensionUtils.getCurrentExtension();
 
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -134,7 +134,11 @@ const WorkSpacePopup = new Lang.Class({
     },
 
     _keyPressHandler: function(keysym, action) {
-        this._select(this._next());
+        if (keysym == Clutter.Left)
+            this._select(this._previous());
+        else
+            this._select(this._next());
+
         return Clutter.EVENT_STOP;
     },
 
@@ -156,7 +160,7 @@ const WorkSpaceList = new Lang.Class({
         this.parent(true);
 
         this._label = new St.Label({ x_align: Clutter.ActorAlign.CENTER,
-                                    y_align: Clutter.ActorAlign.CENTER });
+                                     y_align: Clutter.ActorAlign.CENTER });
         this.actor.add_actor(this._label);
 
         this.icons = [];
