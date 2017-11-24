@@ -32,10 +32,10 @@ const WorkSpace= new Lang.Class({
         this._shellwm =  global.window_manager;
 
         Prefs.bindingAltAboveTab();
-        this.bindingKey();
+        this.addKeybinding();
     },
 
-    bindingKey: function() {
+    addKeybinding: function() {
         let settings = Convenience.getSettings(SCHEMA_NAME);
         let ModeType = Shell.hasOwnProperty('ActionMode') ?
                        Shell.ActionMode : Shell.KeyBindingMode;
