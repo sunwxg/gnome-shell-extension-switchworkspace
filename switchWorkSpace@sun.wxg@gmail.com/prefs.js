@@ -37,6 +37,8 @@ function bindingAltAboveTab() {
         removeAltAboveTab();
     } else if (value[0] === '<Alt>Above_Tab') {
         removeAltAboveTab();
+    } else if (value[0] === '<Alt>grave') {
+        removeAltAboveTab();
     }
 }
 
