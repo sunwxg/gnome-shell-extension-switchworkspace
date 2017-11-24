@@ -41,32 +41,32 @@ function bindingAltAboveTab() {
 }
 
 function removeAltAboveTab() {
-        let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
-        let oldValue = settings.get_strv('switch-group');
-        let newValue = [];
+    let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
+    let oldValue = settings.get_strv('switch-group');
+    let newValue = [];
 
-        for (let i = 0; i < oldValue.length; i++) {
-            if (oldValue[i] === '<Alt>Above_Tab')
-                continue; 
-            newValue.push(oldValue[i]);
-        }
-        settings.set_strv('switch-group', newValue);
+    for (let i = 0; i < oldValue.length; i++) {
+        if (oldValue[i] === '<Alt>Above_Tab')
+            continue;
+        newValue.push(oldValue[i]);
+    }
+    settings.set_strv('switch-group', newValue);
 }
 
 function addAltAboveTab() {
-        let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
-        let oldValue = settings.get_strv('switch-group');
+    let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
+    let oldValue = settings.get_strv('switch-group');
 
-        let included = false;
-        for (let i = 0; i < oldValue.length; i++) {
-            if (oldValue[i] === '<Alt>Above_Tab') {
-                included = true;
-                break; 
-            }
+    let included = false;
+    for (let i = 0; i < oldValue.length; i++) {
+        if (oldValue[i] === '<Alt>Above_Tab') {
+            included = true;
+            break;
         }
-        if (!included)
-            oldValue.push('<Alt>Above_Tab');
-        settings.set_strv('switch-group', oldValue);
+    }
+    if (!included)
+        oldValue.push('<Alt>Above_Tab');
+    settings.set_strv('switch-group', oldValue);
 }
 
 const switchWorkSpaceWidget = new Lang.Class({
@@ -107,7 +107,7 @@ const switchWorkSpaceWidget = new Lang.Class({
                 GObject.TYPE_INT,    // COLUMN_KEY
                 GObject.TYPE_INT]);  // COLUMN_MODS
 
-        let treeView = new Gtk.TreeView({model: model, 
+        let treeView = new Gtk.TreeView({model: model,
             headers_visible: false,
             hexpand: true
         });

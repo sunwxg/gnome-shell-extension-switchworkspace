@@ -31,7 +31,7 @@ const WorkSpace= new Lang.Class({
     _init : function() {
         this._shellwm =  global.window_manager;
 
-	Prefs.bindingAltAboveTab();
+        Prefs.bindingAltAboveTab();
         this.bindingKey();
     },
 
@@ -62,7 +62,7 @@ const WorkSpace= new Lang.Class({
     },
 
     destroy: function() {
-        workspace.unbindingKey();
+        this.unbindingKey();
         Prefs.addAltAboveTab();
     }
 });
