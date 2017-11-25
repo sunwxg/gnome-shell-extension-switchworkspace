@@ -33,8 +33,8 @@ function bindingAltAboveTab() {
     let settings = Convenience.getSettings(SCHEMA_NAME);
     let value = settings.get_strv(SETTING_KEY_SWITCH_WORKSPACE);
     if (value.length === 0 ) {
-        settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, ['<Alt>Above_Tab']);
         removeAltAboveTab();
+        settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, ['<Alt>Above_Tab']);
     } else if (value[0] === '<Alt>Above_Tab') {
         removeAltAboveTab();
     } else if (value[0] === '<Alt>grave') {
