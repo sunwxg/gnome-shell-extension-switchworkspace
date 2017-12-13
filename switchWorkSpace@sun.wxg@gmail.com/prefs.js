@@ -68,7 +68,8 @@ function addAltAboveTab() {
     }
     if (!included)
         oldValue.push('<Alt>Above_Tab');
-    settings.set_strv('switch-group', oldValue);
+    //settings.set_strv('switch-group', oldValue);
+    settings.reset('switch-group');
 }
 
 const switchWorkSpaceWidget = new Lang.Class({
