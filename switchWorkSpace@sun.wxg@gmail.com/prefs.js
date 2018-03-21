@@ -72,33 +72,38 @@ function addAltAboveTab() {
     settings.reset('switch-group');
 }
 
+function addBoldTextToBox(text, box) {
+    let txt = new Gtk.Label({xalign: 0});
+    txt.set_markup('<b>' + text + '</b>');
+    txt.set_line_wrap(true);
+    box.add(txt);
+}
+
 const switchWorkSpaceWidget = new Lang.Class({
     Name: 'switchWorkSpaceWidget',
     GTypeName: 'switchWorkSpaceWidget',
-    Extends: Gtk.Grid,
+    Extends: Gtk.Box,
 
     _init: function(params) {
         this.parent(params);
 
-        this.margin = 10;
-        this.row_spacing = 12;
-        this.column_spacing = 18;
-        this.column_homogeneous = false;
-        this.row_homogeneous = false;
         this.orientation = Gtk.Orientation.VERTICAL;
+        this.border_width = 10;
 
-        let label = new Gtk.Label({ label: 'Switch Workspace Keybinding', use_markup: true,
-                                    halign: Gtk.Align.START });
-        this.attach(label, 1, 1, 2, 1);
+        let vbox = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, margin: 20, margin_top: 10 });
+        vbox.set_size_request(550, 350);
+
+        addBoldTextToBox("Switch Workspace Keybinding", vbox);
+        vbox.add(new Gtk.HSeparator({margin_bottom: 5, margin_top: 5}));
 
         this._settings = Convenience.getSettings(SCHEMA_NAME);
 
         let box = this.keybindingBox(this._settings);
+        vbox.add(box);
+        this.add(vbox);
 
         addKeybinding(box.model, this._settings, SETTING_KEY_SWITCH_WORKSPACE,
                         "switch workspace");
-
-        this.attach(box, 1, 2, 2, 2);
     },
 
     keybindingBox: function(SettingsSchema) {
