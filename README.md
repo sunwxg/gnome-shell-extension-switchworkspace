@@ -8,7 +8,7 @@ Switch workspace like using `ALT+TAB` key to switch windows.
 
 ## Install
 
-1. Clone repo to local folder
+* Clone repo to local folder
 
 ```
 make install
@@ -16,7 +16,7 @@ make install
 
 > relogin OS
 
-2. Install from extensions.gnome.org
+* Install from extensions.gnome.org
 
 > https://extensions.gnome.org/extension/1231/switch-workspace/
 
