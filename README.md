@@ -14,7 +14,7 @@ Switch workspace like using `ALT+TAB` key to switch windows.
 make install
 ```
 
-relogin OS
+> relogin OS
 
 2. Install from extensions.gnome.org
 
