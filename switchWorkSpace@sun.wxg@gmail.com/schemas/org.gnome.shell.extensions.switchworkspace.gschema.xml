@@ -1,14 +1,23 @@
 <schemalist gettext-domain="gnome-shell-extensions">
-  <schema id="org.gnome.shell.extensions.switchWorkSpace"
-      path="/org/gnome/shell/extensions/switchWorkSpace/">
-
+  <schema id="org.gnome.shell.extensions.switchWorkSpace" path="/org/gnome/shell/extensions/switchWorkSpace/">
     <key name="switch-workspace" type="as">
       <default><![CDATA[['<Alt>Above_Tab']]]></default>
       <summary>Key to switch workspace</summary>
       <description>
       </description>
     </key>
-
+    <key name="workspace1-name" type="s">
+      <default>''</default>
+    </key>
+    <key name="workspace2-name" type="s">
+      <default>''</default>
+    </key>
+    <key name="workspace3-name" type="s">
+      <default>''</default>
+    </key>
+    <key name="workspace4-name" type="s">
+      <default>''</default>
+    </key>
   </schema>
 </schemalist>
 

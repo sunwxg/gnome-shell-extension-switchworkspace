@@ -24,24 +24,40 @@ const APP_ICON_SIZE_SMALL = 48;
 
 const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
+const SETTING_KEY_WORKSPACE_NAME = {
+       1 : 'workspace1-name',
+       2 : 'workspace2-name',
+       3 : 'workspace3-name',
+       4 : 'workspace4-name',
+      };
 
 const WorkSpace= new Lang.Class({
     Name: 'WorkSpace',
 
     _init : function() {
+        this._settings = Convenience.getSettings(SCHEMA_NAME);
+
         this._shellwm =  global.window_manager;
 
         Prefs.bindingAltAboveTab();
         this.addKeybinding();
+
+        this.workspaceName = [];
+
+        for (let i in SETTING_KEY_WORKSPACE_NAME) {
+            this.workspaceName[i] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[i]);
+
+            this._settings.connect('changed::' + SETTING_KEY_WORKSPACE_NAME[i],
+                () => { this.workspaceName[i] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[i]); });
+        }
     },
 
     addKeybinding: function() {
-        let settings = Convenience.getSettings(SCHEMA_NAME);
         let ModeType = Shell.hasOwnProperty('ActionMode') ?
                        Shell.ActionMode : Shell.KeyBindingMode;
 
         Main.wm.addKeybinding(SETTING_KEY_SWITCH_WORKSPACE,
-                              settings,
+                              this._settings,
                               Meta.KeyBindingFlags.NONE,
                               ModeType.ALL,
                               Lang.bind(this, this._switchWorkspace));
@@ -231,7 +247,13 @@ const WindowIcon = new Lang.Class({
     Name: 'WindowIcon',
 
     _init: function(workspace_index) {
-        this.label = new St.Label({ text: "WorkSpace" + " " + String(workspace_index + 1) });
+        let settings = Convenience.getSettings(SCHEMA_NAME);
+        //let workspaceName = settings.get_string(SETTING_KEY_WORKSPACE_NAME[workspace_index + 1]);
+        let workspaceName = workspace.workspaceName[workspace_index + 1];
+        print("wxg: workspaceName=", workspaceName);
+        if (workspaceName == '')
+            workspaceName = "WorkSpace" + " " + String(workspace_index + 1);
+        this.label = new St.Label({ text: workspaceName });
 
         this.actor = new St.BoxLayout({ style_class: 'alt-tab-app',
                                         vertical: true });
