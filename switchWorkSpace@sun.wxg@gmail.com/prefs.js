@@ -17,93 +17,49 @@ const COLUMN_MODS        = 3;
 
 const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
+const SETTING_KEY_WORKSPACE_NAME = {
+       1 : 'workspace1-name',
+       2 : 'workspace2-name',
+       3 : 'workspace3-name',
+       4 : 'workspace4-name',
+      };
 
 function init() {
     //Convenience.initTranslations();
 }
 
 function buildPrefsWidget() {
-    let widget = new switchWorkSpaceWidget();
+    let frame = new Frame();
+    let widget = frame.widget;
     widget.show_all();
 
     return widget;
 }
 
-function bindingAltAboveTab() {
-    let settings = Convenience.getSettings(SCHEMA_NAME);
-    let value = settings.get_strv(SETTING_KEY_SWITCH_WORKSPACE);
-    if (value.length === 0 ) {
-        removeAltAboveTab();
-        settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, ['<Alt>Above_Tab']);
-    } else if (value[0] === '<Alt>Above_Tab') {
-        removeAltAboveTab();
-    } else if (value[0] === '<Alt>grave') {
-        removeAltAboveTab();
-    }
-}
+const Frame = new Lang.Class({
+    Name: 'Frame',
 
-function removeAltAboveTab() {
-    let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
-    let oldValue = settings.get_strv('switch-group');
-    let newValue = [];
+    _init: function() {
+        this._builder = new Gtk.Builder();
+        this._builder.add_from_file(Me.path + '/Frame.ui');
 
-    for (let i = 0; i < oldValue.length; i++) {
-        if (oldValue[i] === '<Alt>Above_Tab')
-            continue;
-        newValue.push(oldValue[i]);
-    }
-    settings.set_strv('switch-group', newValue);
-}
-
-function addAltAboveTab() {
-    let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
-    let oldValue = settings.get_strv('switch-group');
-
-    let included = false;
-    for (let i = 0; i < oldValue.length; i++) {
-        if (oldValue[i] === '<Alt>Above_Tab') {
-            included = true;
-            break;
-        }
-    }
-    if (!included)
-        oldValue.push('<Alt>Above_Tab');
-    //settings.set_strv('switch-group', oldValue);
-    settings.reset('switch-group');
-}
-
-function addBoldTextToBox(text, box) {
-    let txt = new Gtk.Label({xalign: 0});
-    txt.set_markup('<b>' + text + '</b>');
-    txt.set_line_wrap(true);
-    box.add(txt);
-}
-
-const switchWorkSpaceWidget = new Lang.Class({
-    Name: 'switchWorkSpaceWidget',
-    GTypeName: 'switchWorkSpaceWidget',
-    Extends: Gtk.Box,
-
-    _init: function(params) {
-        this.parent(params);
-
-        this.orientation = Gtk.Orientation.VERTICAL;
-        this.border_width = 10;
-
-        let vbox = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, margin: 20, margin_top: 10 });
-        vbox.set_size_request(550, 350);
-
-        addBoldTextToBox("Switch Workspace Keybinding", vbox);
-        vbox.add(new Gtk.HSeparator({margin_bottom: 5, margin_top: 5}));
+        this.widget = this._builder.get_object('settings_notebook');
 
         this._settings = Convenience.getSettings(SCHEMA_NAME);
 
+        let bindings_box = this._builder.get_object('key_bindings');
         let box = this.keybindingBox(this._settings);
-        vbox.add(box);
-        this.add(vbox);
+        bindings_box.add(box);
 
         addKeybinding(box.model, this._settings, SETTING_KEY_SWITCH_WORKSPACE,
                         "switch workspace");
+
+        for (let i in SETTING_KEY_WORKSPACE_NAME) {
+            let workspace = this._builder.get_object(SETTING_KEY_WORKSPACE_NAME[i]);
+            workspace.set_text(this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[i]));
+            workspace.connect('changed', (entry) => {
+                this._settings.set_string(SETTING_KEY_WORKSPACE_NAME[i], entry.get_text()); });
+        }
     },
 
     keybindingBox: function(SettingsSchema) {
@@ -178,6 +134,49 @@ const switchWorkSpaceWidget = new Lang.Class({
         return treeView;
     },
 });
+
+function bindingAltAboveTab() {
+    let settings = Convenience.getSettings(SCHEMA_NAME);
+    let value = settings.get_strv(SETTING_KEY_SWITCH_WORKSPACE);
+    if (value.length === 0 ) {
+        removeAltAboveTab();
+        settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, ['<Alt>Above_Tab']);
+    } else if (value[0] === '<Alt>Above_Tab') {
+        removeAltAboveTab();
+    } else if (value[0] === '<Alt>grave') {
+        removeAltAboveTab();
+    }
+}
+
+function removeAltAboveTab() {
+    let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
+    let oldValue = settings.get_strv('switch-group');
+    let newValue = [];
+
+    for (let i = 0; i < oldValue.length; i++) {
+        if (oldValue[i] === '<Alt>Above_Tab')
+            continue;
+        newValue.push(oldValue[i]);
+    }
+    settings.set_strv('switch-group', newValue);
+}
+
+function addAltAboveTab() {
+    let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
+    let oldValue = settings.get_strv('switch-group');
+
+    let included = false;
+    for (let i = 0; i < oldValue.length; i++) {
+        if (oldValue[i] === '<Alt>Above_Tab') {
+            included = true;
+            break;
+        }
+    }
+    if (!included)
+        oldValue.push('<Alt>Above_Tab');
+    //settings.set_strv('switch-group', oldValue);
+    settings.reset('switch-group');
+}
 
 function addKeybinding(model, settings, id, description) {
     let accelerator = settings.get_strv(id)[0];
