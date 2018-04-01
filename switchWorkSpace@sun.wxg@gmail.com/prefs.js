@@ -30,10 +30,9 @@ function init() {
 
 function buildPrefsWidget() {
     let frame = new Frame();
-    let widget = frame.widget;
-    widget.show_all();
+    frame.widget.show_all();
 
-    return widget;
+    return frame.widget;
 }
 
 const Frame = new Lang.Class({
