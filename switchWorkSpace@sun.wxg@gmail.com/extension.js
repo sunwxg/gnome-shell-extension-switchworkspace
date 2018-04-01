@@ -248,9 +248,7 @@ const WindowIcon = new Lang.Class({
 
     _init: function(workspace_index) {
         let settings = Convenience.getSettings(SCHEMA_NAME);
-        //let workspaceName = settings.get_string(SETTING_KEY_WORKSPACE_NAME[workspace_index + 1]);
         let workspaceName = workspace.workspaceName[workspace_index + 1];
-        print("wxg: workspaceName=", workspaceName);
         if (workspaceName == null || workspaceName == '')
             workspaceName = "WorkSpace" + " " + String(workspace_index + 1);
         this.label = new St.Label({ text: workspaceName });
