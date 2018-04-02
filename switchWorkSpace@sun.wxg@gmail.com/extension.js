@@ -45,11 +45,15 @@ const WorkSpace= new Lang.Class({
         this.workspaceName = [];
 
         for (let i in SETTING_KEY_WORKSPACE_NAME) {
-            this.workspaceName[i] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[i]);
-
-            this._settings.connect('changed::' + SETTING_KEY_WORKSPACE_NAME[i],
-                () => { this.workspaceName[i] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[i]); });
+            this.workspaceNameBinding(i);
         }
+    },
+
+    workspaceNameBinding: function(index) {
+            this.workspaceName[index] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]);
+
+            this._settings.connect('changed::' + SETTING_KEY_WORKSPACE_NAME[index],
+                () => { this.workspaceName[index] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]); });
     },
 
     addKeybinding: function() {

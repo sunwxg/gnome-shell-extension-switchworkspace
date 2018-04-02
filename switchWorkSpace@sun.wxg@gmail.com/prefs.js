@@ -54,11 +54,15 @@ const Frame = new Lang.Class({
                         "switch workspace");
 
         for (let i in SETTING_KEY_WORKSPACE_NAME) {
-            let workspace = this._builder.get_object(SETTING_KEY_WORKSPACE_NAME[i]);
-            workspace.set_text(this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[i]));
-            workspace.connect('changed', (entry) => {
-                this._settings.set_string(SETTING_KEY_WORKSPACE_NAME[i], entry.get_text()); });
+            this.workspaceNameBinding(i);
         }
+    },
+
+    workspaceNameBinding: function(index) {
+        let workspace = this._builder.get_object(SETTING_KEY_WORKSPACE_NAME[index]);
+        workspace.set_text(this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]));
+        workspace.connect('changed', (entry) => {
+            this._settings.set_string(SETTING_KEY_WORKSPACE_NAME[index], entry.get_text()); });
     },
 
     keybindingBox: function(SettingsSchema) {
