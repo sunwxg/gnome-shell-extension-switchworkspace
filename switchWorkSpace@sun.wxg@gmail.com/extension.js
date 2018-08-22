@@ -43,6 +43,7 @@ const WorkSpace= new Lang.Class({
         this.addKeybinding();
 
         this.workspaceName = [];
+        this.workspaceNameBindingId = [];
 
         for (let i in SETTING_KEY_WORKSPACE_NAME) {
             this.workspaceNameBinding(i);
@@ -52,8 +53,15 @@ const WorkSpace= new Lang.Class({
     workspaceNameBinding: function(index) {
             this.workspaceName[index] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]);
 
-            this._settings.connect('changed::' + SETTING_KEY_WORKSPACE_NAME[index],
+            this.workspaceNameBindingId[index] = this._settings.connect('changed::' + SETTING_KEY_WORKSPACE_NAME[index],
                 () => { this.workspaceName[index] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]); });
+    },
+
+    workspaceNameUnBinding: function(index) {
+            if (this.workspaceNameBindingId[index]) {
+                    this._settings.disconnect(this.workspaceNameBindingId[index]);
+		    this.workspaceNameBindingId[index] = null;
+            }
     },
 
     addKeybinding: function() {
@@ -64,14 +72,14 @@ const WorkSpace= new Lang.Class({
                               this._settings,
                               Meta.KeyBindingFlags.NONE,
                               ModeType.ALL,
-                              Lang.bind(this, this._switchWorkspace));
+                              this._switchWorkspace.bind(this));
     },
 
     unbindingKey: function() {
         Main.wm.removeKeybinding(SETTING_KEY_SWITCH_WORKSPACE);
     },
 
-    _switchWorkspace : function(display, screen, window, binding) {
+    _switchWorkspace : function(display, window, binding) {
         popupList.update();
 
         let tabPopup = new WorkSpacePopup();
@@ -84,6 +92,10 @@ const WorkSpace= new Lang.Class({
     destroy: function() {
         this.unbindingKey();
         Prefs.addAltAboveTab();
+
+        for (let i in SETTING_KEY_WORKSPACE_NAME) {
+            this.workspaceNameUnBinding(i);
+        }
     }
 });
 
@@ -95,10 +107,10 @@ const PopupList = new Lang.Class({
     },
 
     create: function() {
-        let activeWs = global.screen.get_active_workspace();
+        let activeWs = global.workspace_manager.get_active_workspace();
         this._popupList.push(activeWs.index());
 
-        for (let i = 0; i < global.screen.n_workspaces; i++) {
+        for (let i = 0; i < global.workspace_manager.n_workspaces; i++) {
             if (i === activeWs.index())
                 continue;
             this._popupList.push(i);
@@ -110,22 +122,22 @@ const PopupList = new Lang.Class({
         if (this._popupList.length === 0) {
             this.create();
         } else {
-            let activeWs = global.screen.get_active_workspace();
+            let activeWs = global.workspace_manager.get_active_workspace();
             let activeWsIndex = activeWs.index();
             if (activeWsIndex != this._popupList[this._popupList.length - 1]) {
                 this.moveToTop(activeWsIndex);
             }
 
-            if (this._popupList.length > global.screen.n_workspaces) {
-                let index = this._popupList.indexOf(global.screen.n_workspaces);
+            if (this._popupList.length > global.workspace_manager.n_workspaces) {
+                let index = this._popupList.indexOf(global.workspace_manager.n_workspaces);
                 if (index > -1) {
                     this._popupList.splice(index, 1);
                 }
             }
 
-            if (this._popupList.length < global.screen.n_workspaces) {
+            if (this._popupList.length < global.workspace_manager.n_workspaces) {
                 this._popupList.reverse();
-                this._popupList.push(global.screen.n_workspaces - 1);
+                this._popupList.push(global.workspace_manager.n_workspaces - 1);
                 this._popupList.reverse();
             }
         }
@@ -165,7 +177,7 @@ const WorkSpacePopup = new Lang.Class({
     _finish: function() {
         Main.wm.actionMoveWorkspace(this._switcherList.selectWorkspaces[this._selectedIndex]);
 
-        let activeWs = global.screen.get_active_workspace();
+        let activeWs = global.workspace_manager.get_active_workspace();
         popupList.moveToTop(activeWs.index());
 
         this.parent();
@@ -189,7 +201,7 @@ const WorkSpaceList = new Lang.Class({
         this.selectWorkspaces = [];
 
         let popup = popupList._popupList.slice();
-        for (let i = 0; i < global.screen.n_workspaces; i++) {
+        for (let i = 0; i < global.workspace_manager.n_workspaces; i++) {
             let workspace_index = popup.pop();
             this.selectWorkspaces[i] = this.workspaces[workspace_index];
 
@@ -201,7 +213,7 @@ const WorkSpaceList = new Lang.Class({
     },
 
     getWorkSpace: function() {
-        let activeWs = global.screen.get_active_workspace();
+        let activeWs = global.workspace_manager.get_active_workspace();
         let activeIndex = activeWs.index();
         let ws = [];
 
@@ -211,7 +223,7 @@ const WorkSpaceList = new Lang.Class({
             ws[i] = ws[i + 1].get_neighbor(Meta.MotionDirection.UP);
         }
 
-        for (let i = activeIndex + 1; i < global.screen.n_workspaces; i++) {
+        for (let i = activeIndex + 1; i < global.workspace_manager.n_workspaces; i++) {
             ws[i] = ws[i - 1].get_neighbor(Meta.MotionDirection.DOWN);
         }
 
@@ -274,7 +286,7 @@ const WindowIcon = new Lang.Class({
         let scale = Math.min(1.0, windowSize / this._porthole.width,
                                 windowSize / this._porthole.height);
 
-        let metaWorkspace = global.screen.get_workspace_by_index(workspace_index);
+        let metaWorkspace = global.workspace_manager.get_workspace_by_index(workspace_index);
         let thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
         thumbnail.actor.set_scale(scale, scale);
 
