@@ -5,13 +5,9 @@
     "sun.wxg@gmail.com"
   ],
   "shell-version": [
-    "3.20",
-    "3.22",
-    "3.24",
-    "3.26",
-    "3.28"
+    "3.30"
   ],
   "url": "https://github.com/sunwxg/gnome-shell-extension-switchworkspace",
   "uuid": "switchWorkSpace@sun.wxg@gmail.com",
-  "version": 1.2
+  "version": 1.3
 }
