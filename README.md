@@ -21,3 +21,4 @@ make install
 > https://extensions.gnome.org/extension/1231/switch-workspace/
 
 ![screenshot](/switch-workspaces.gif)
+![screenshot](/Screenshot.png)
