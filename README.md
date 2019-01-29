@@ -13,12 +13,11 @@ Switch workspace like using `ALT+TAB` key to switch windows.
 ```
 make install
 ```
+restart system
 
-> relogin OS
+### Install from extensions.gnome.org
 
-* Install from extensions.gnome.org
-
-> https://extensions.gnome.org/extension/1231/switch-workspace/
+https://extensions.gnome.org/extension/1231/switch-workspace/
 
 ![screenshot](/switch-workspaces.gif)
 ![screenshot](/Screenshot.png)
