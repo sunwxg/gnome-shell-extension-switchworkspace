@@ -2,9 +2,7 @@
 
 Switch workspace like using `ALT+TAB` key to switch windows.
 
-* Default shortcut key to switch workspace is **ALT+\`** . **\`** is above `TAB`.
-
-* **ALT+\`** is used to switch-group by system default. You can chose other key to switch workspace.
+* Default shortcut key to switch workspace is **Super+Above_Tab`** .
 
 ## Install
 
@@ -14,7 +12,7 @@ Switch workspace like using `ALT+TAB` key to switch windows.
 make install
 ```
 
-> relogin OS
+> restart system
 
 * Install from extensions.gnome.org
 
