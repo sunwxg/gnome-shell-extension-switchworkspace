@@ -47,11 +47,7 @@ const Frame = new Lang.Class({
         this._settings = Convenience.getSettings(SCHEMA_NAME);
 
         let bindings_box = this._builder.get_object('key_bindings');
-        let box = this.keybindingBox(this._settings);
-        bindings_box.add(box);
-
-        addKeybinding(box.model, this._settings, SETTING_KEY_SWITCH_WORKSPACE,
-                        "switch workspace");
+        bindings_box.add(this.keybindingBox(this._settings));
 
         for (let i in SETTING_KEY_WORKSPACE_NAME) {
             this.workspaceNameBinding(i);
@@ -66,127 +62,46 @@ const Frame = new Lang.Class({
     },
 
     keybindingBox: function(SettingsSchema) {
-        let model = new Gtk.ListStore();
+        let box = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL });
+        let button1 = new Gtk.RadioButton({ label: 'Alt + `' });
+        button1.key = '<Alt>Above_Tab';
+        box.pack_start(button1, false, false, 0);
 
-        model.set_column_types(
-            [GObject.TYPE_STRING, // COLUMN_ID
-                GObject.TYPE_STRING, // COLUMN_DESCRIPTION
-                GObject.TYPE_INT,    // COLUMN_KEY
-                GObject.TYPE_INT]);  // COLUMN_MODS
+        let button2 = new Gtk.RadioButton({ group: button1,
+                                            margin_left: 15,
+                                            label: 'Super + `' });
+        button2.key = '<Super>Above_Tab';
+        box.pack_start(button2, false, false, 0);
 
-        let treeView = new Gtk.TreeView({model: model,
-            headers_visible: false,
-            hexpand: true
-        });
+        let button3 = new Gtk.RadioButton({ group: button1,
+                                            margin_left: 15,
+                                            label: 'Ctrl + `' });
+        button3.key = '<Control>Above_Tab';
+        box.pack_start(button3, false, false, 0);
 
-        let column, renderer;
-
-        renderer = new Gtk.CellRendererText();
-
-        column = new Gtk.TreeViewColumn({expand: true});
-        column.pack_start(renderer, true);
-        column.add_attribute(renderer, "text", COLUMN_DESCRIPTION);
-
-        treeView.append_column(column);
-
-        renderer = new Gtk.CellRendererAccel();
-        renderer.accel_mode = Gtk.CellRendererAccelMode.GTK;
-        renderer.editable = true;
-
-        renderer.connect("accel-edited",
-            function (renderer, path, key, mods, hwCode) {
-                let [ok, iter] = model.get_iter_from_string(path);
-                if(!ok)
-                    return;
-
-                addAltAboveTab();
-
-                // Update the UI.
-                model.set(iter, [COLUMN_KEY, COLUMN_MODS], [key, mods]);
-
-                // Update the stored setting.
-                let id = model.get_value(iter, COLUMN_ID);
-                let accelString = Gtk.accelerator_name(key, mods);
-                SettingsSchema.set_strv(id, [accelString]);
-            });
-
-        renderer.connect("accel-cleared",
-            function (renderer, path) {
-                let [ok, iter] = model.get_iter_from_string(path);
-                if(!ok)
-                    return;
-
-                // Update the UI.
-                model.set(iter, [COLUMN_KEY, COLUMN_MODS], [0, 0]);
-
-                // Update the stored setting.
-                let id = model.get_value(iter, COLUMN_ID);
-                SettingsSchema.set_strv(id, []);
-
-                removeAltAboveTab();
-                bindingAltAboveTab();
-            });
-
-        column = new Gtk.TreeViewColumn();
-        column.pack_end(renderer, false);
-        column.add_attribute(renderer, "accel-key", COLUMN_KEY);
-        column.add_attribute(renderer, "accel-mods", COLUMN_MODS);
-
-        treeView.append_column(column);
-
-        return treeView;
-    },
-});
-
-function bindingAltAboveTab() {
-    let settings = Convenience.getSettings(SCHEMA_NAME);
-    let value = settings.get_strv(SETTING_KEY_SWITCH_WORKSPACE);
-    if (value.length === 0 ) {
-        removeAltAboveTab();
-        settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, ['<Alt>Above_Tab']);
-    } else if (value[0] === '<Alt>Above_Tab') {
-        removeAltAboveTab();
-    } else if (value[0] === '<Alt>grave') {
-        removeAltAboveTab();
-    }
-}
-
-function removeAltAboveTab() {
-    let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
-    let oldValue = settings.get_strv('switch-group');
-    let newValue = [];
-
-    for (let i = 0; i < oldValue.length; i++) {
-        if (oldValue[i] === '<Alt>Above_Tab')
-            continue;
-        newValue.push(oldValue[i]);
-    }
-    settings.set_strv('switch-group', newValue);
-}
-
-function addAltAboveTab() {
-    let settings = Convenience.getSettings('org.gnome.desktop.wm.keybindings');
-    let oldValue = settings.get_strv('switch-group');
-
-    let included = false;
-    for (let i = 0; i < oldValue.length; i++) {
-        if (oldValue[i] === '<Alt>Above_Tab') {
-            included = true;
+        let [key] = this._settings.get_strv(SETTING_KEY_SWITCH_WORKSPACE);
+        switch (key) {
+        case '<Alt>Above_Tab':
+            button1.set_active(true);
+            break;
+        case '<Super>Above_Tab':
+            button2.set_active(true);
+            break;
+        case '<Control>Above_Tab':
+            button3.set_active(true);
             break;
         }
-    }
-    if (!included)
-        oldValue.push('<Alt>Above_Tab');
-    //settings.set_strv('switch-group', oldValue);
-    settings.reset('switch-group');
-}
 
-function addKeybinding(model, settings, id, description) {
-    let accelerator = settings.get_strv(id)[0];
-    let [key, mods] = Gtk.accelerator_parse(settings.get_strv(id)[0]);
+        button1.connect("toggled", Lang.bind(this, this.radioToggled))
+        button2.connect("toggled", Lang.bind(this, this.radioToggled))
+        button3.connect("toggled", Lang.bind(this, this.radioToggled))
 
-    let row = model.insert(100);
-    model.set(row,
-        [COLUMN_ID, COLUMN_DESCRIPTION, COLUMN_KEY, COLUMN_MODS],
-        [id,        description,        key,        mods]);
-}
+        return box;
+    },
+
+    radioToggled: function(button) {
+        if (button.get_active()) {
+            this._settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, [button.key]);
+        }
+    },
+});

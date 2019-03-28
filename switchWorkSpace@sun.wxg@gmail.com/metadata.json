@@ -1,5 +1,5 @@
 {
-  "description": "Switch workspace like using ALT+TAB key to switch windows \n\n Default shortcut key to switch workspace is ALT+` . ` is above TAB.  ALT+` is used to switch-group by system default. You can chose other key to switch workspace.",
+  "description": "Switch workspace like using ALT+TAB key to switch windows \n\n Default shortcut key to switch workspace is Super+Above_Tab.",
   "name": "Switch Workspace",
   "original-authors": [
     "sun.wxg@gmail.com"
@@ -12,6 +12,5 @@
     "3.28"
   ],
   "url": "https://github.com/sunwxg/gnome-shell-extension-switchworkspace",
-  "uuid": "switchWorkSpace@sun.wxg@gmail.com",
-  "version": 1.2
+  "uuid": "switchWorkSpace@sun.wxg@gmail.com"
 }

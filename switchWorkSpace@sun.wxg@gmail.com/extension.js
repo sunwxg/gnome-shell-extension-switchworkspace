@@ -17,7 +17,6 @@ const Extension = imports.misc.extensionUtils.getCurrentExtension();
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
-const Prefs = Me.imports.prefs;
 
 const WINDOW_PREVIEW_SIZE = 128;
 const APP_ICON_SIZE_SMALL = 48;
@@ -39,7 +38,6 @@ const WorkSpace= new Lang.Class({
 
         this._shellwm =  global.window_manager;
 
-        Prefs.bindingAltAboveTab();
         this.addKeybinding();
 
         this.workspaceName = [];
@@ -83,7 +81,6 @@ const WorkSpace= new Lang.Class({
 
     destroy: function() {
         this.unbindingKey();
-        Prefs.addAltAboveTab();
     }
 });
 
