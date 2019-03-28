@@ -2,7 +2,7 @@
 
 Switch workspace like using `ALT+TAB` key to switch windows.
 
-* Default shortcut key to switch workspace is **Super+Above_Tab** .
+* Default shortcut key to switch workspace is **Ctrl+Above_Tab** .
 
 ## Install
 
