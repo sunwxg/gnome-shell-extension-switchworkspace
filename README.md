@@ -12,7 +12,7 @@ Switch workspace like using `ALT+TAB` key to switch windows.
 make install
 ```
 
-restart system
+> restart system
 
 * Install from extensions.gnome.org
 
