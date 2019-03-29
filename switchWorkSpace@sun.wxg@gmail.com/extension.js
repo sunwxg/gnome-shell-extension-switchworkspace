@@ -49,17 +49,17 @@ const WorkSpace= new Lang.Class({
     },
 
     workspaceNameBinding: function(index) {
-            this.workspaceName[index] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]);
+        this.workspaceName[index] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]);
 
-            this.workspaceNameBindingId[index] = this._settings.connect('changed::' + SETTING_KEY_WORKSPACE_NAME[index],
-                () => { this.workspaceName[index] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]); });
+        this.workspaceNameBindingId[index] = this._settings.connect('changed::' + SETTING_KEY_WORKSPACE_NAME[index],
+            () => { this.workspaceName[index] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]); });
     },
 
     workspaceNameUnBinding: function(index) {
-            if (this.workspaceNameBindingId[index]) {
-                this._settings.disconnect(this.workspaceNameBindingId[index]);
-                this.workspaceNameBindingId[index] = null;
-            }
+        if (this.workspaceNameBindingId[index]) {
+            this._settings.disconnect(this.workspaceNameBindingId[index]);
+            this.workspaceNameBindingId[index] = null;
+        }
     },
 
     addKeybinding: function() {
