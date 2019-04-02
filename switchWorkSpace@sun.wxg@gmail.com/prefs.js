@@ -35,10 +35,8 @@ function buildPrefsWidget() {
     return frame.widget;
 }
 
-const Frame = new Lang.Class({
-    Name: 'Frame',
-
-    _init: function() {
+var Frame = class Frame {
+    constructor() {
         this._builder = new Gtk.Builder();
         this._builder.add_from_file(Me.path + '/Frame.ui');
 
@@ -53,17 +51,17 @@ const Frame = new Lang.Class({
         for (let i in SETTING_KEY_WORKSPACE_NAME) {
             this.workspaceNameBinding(i);
         }
-    },
+    }
 
-    workspaceNameBinding: function(index) {
+    workspaceNameBinding(index) {
         let workspace = this._builder.get_object(SETTING_KEY_WORKSPACE_NAME[index]);
         workspace.set_text(this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]));
         workspace.connect('changed', (entry) => {
             this._settings.set_string(SETTING_KEY_WORKSPACE_NAME[index], entry.get_text()); });
-    },
+    }
 
 
-    keybindingBox: function(SettingsSchema) {
+    keybindingBox(SettingsSchema) {
         let box = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL });
         let button1 = new Gtk.RadioButton({ label: 'Alt + `' });
         button1.key = '<Alt>Above_Tab';
@@ -99,9 +97,9 @@ const Frame = new Lang.Class({
         button3.connect("toggled", Lang.bind(this, this.radioToggled))
 
         return box;
-    },
+    }
 
-    radioToggled: function(button) {
+    radioToggled(button) {
         if (!(button.get_active()))
             return;
 
@@ -118,5 +116,5 @@ const Frame = new Lang.Class({
             this.desktopSettings.set_strv('switch-group', ['<Alt>Above_Tab', '<Super>Above_Tab']);
             break;
         }
-    },
-});
+    }
+};

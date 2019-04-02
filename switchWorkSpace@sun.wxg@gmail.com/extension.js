@@ -1,5 +1,6 @@
 const Lang = imports.lang;
 const Gio = imports.gi.Gio;
+const GObject = imports.gi.GObject;
 const Shell = imports.gi.Shell;
 const GLib = imports.gi.GLib;
 const Meta = imports.gi.Meta;
@@ -30,13 +31,9 @@ const SETTING_KEY_WORKSPACE_NAME = {
        4 : 'workspace4-name',
       };
 
-const WorkSpace= new Lang.Class({
-    Name: 'WorkSpace',
-
-    _init : function() {
+var WorkSpace = class WorkSpace {
+    constructor() {
         this._settings = Convenience.getSettings(SCHEMA_NAME);
-
-        this._shellwm =  global.window_manager;
 
         this.addKeybinding();
 
@@ -46,23 +43,23 @@ const WorkSpace= new Lang.Class({
         for (let i in SETTING_KEY_WORKSPACE_NAME) {
             this.workspaceNameBinding(i);
         }
-    },
+    }
 
-    workspaceNameBinding: function(index) {
+    workspaceNameBinding(index) {
         this.workspaceName[index] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]);
 
         this.workspaceNameBindingId[index] = this._settings.connect('changed::' + SETTING_KEY_WORKSPACE_NAME[index],
             () => { this.workspaceName[index] = this._settings.get_string(SETTING_KEY_WORKSPACE_NAME[index]); });
-    },
+    }
 
-    workspaceNameUnBinding: function(index) {
+    workspaceNameUnBinding(index) {
         if (this.workspaceNameBindingId[index]) {
             this._settings.disconnect(this.workspaceNameBindingId[index]);
             this.workspaceNameBindingId[index] = null;
         }
-    },
+    }
 
-    addKeybinding: function() {
+    addKeybinding() {
         let ModeType = Shell.hasOwnProperty('ActionMode') ?
                        Shell.ActionMode : Shell.KeyBindingMode;
 
@@ -71,13 +68,13 @@ const WorkSpace= new Lang.Class({
                               Meta.KeyBindingFlags.NONE,
                               ModeType.ALL,
                               this._switchWorkspace.bind(this));
-    },
+    }
 
-    unbindingKey: function() {
+    unbindingKey() {
         Main.wm.removeKeybinding(SETTING_KEY_SWITCH_WORKSPACE);
-    },
+    }
 
-    _switchWorkspace : function(display, window, binding) {
+    _switchWorkspace(display, window, binding) {
         popupList.update();
 
         let tabPopup = new WorkSpacePopup();
@@ -85,25 +82,23 @@ const WorkSpace= new Lang.Class({
         if (!tabPopup.show(binding.is_reversed(), binding.get_name(), binding.get_mask())) {
             tabPopup.destroy();
         }
-    },
+    }
 
-    destroy: function() {
+    destroy() {
         this.unbindingKey();
 
         for (let i in SETTING_KEY_WORKSPACE_NAME) {
             this.workspaceNameUnBinding(i);
         }
     }
-});
+};
 
-const PopupList = new Lang.Class({
-    Name: 'PopupList',
-
-    _init : function() {
+var PopupList = class PopupList {
+    constructor() {
         this._popupList = [];
-    },
+    }
 
-    create: function() {
+    create() {
         let activeWs = global.workspace_manager.get_active_workspace();
         this._popupList.push(activeWs.index());
 
@@ -113,9 +108,9 @@ const PopupList = new Lang.Class({
             this._popupList.push(i);
         }
         this._popupList.reverse();
-    },
+    }
 
-    update: function() {
+    update() {
         if (this._popupList.length === 0) {
             this.create();
         } else {
@@ -138,9 +133,9 @@ const PopupList = new Lang.Class({
                 this._popupList.reverse();
             }
         }
-    },
+    }
 
-    moveToTop: function(workspaceIndex) {
+    moveToTop(workspaceIndex) {
         let index = this._popupList.indexOf(workspaceIndex);
 
         if (index > -1) {
@@ -148,53 +143,49 @@ const PopupList = new Lang.Class({
         }
 
         this._popupList.push(workspaceIndex);
-    },
-});
+    }
+};
 
-const WorkSpacePopup = new Lang.Class({
-    Name: 'WorkSpacePopup',
-    Extends: SwitcherPopup.SwitcherPopup,
-
-    _init: function() {
-        this.parent();
+var WorkSpacePopup = GObject.registerClass(
+class WorkSpacePopup extends SwitcherPopup.SwitcherPopup {
+    _init() {
+        super._init();
 
         this._switcherList = new WorkSpaceList();
         this._items = this._switcherList.icons;
-    },
+    }
 
-    _keyPressHandler: function(keysym, action) {
+    _keyPressHandler(keysym, action) {
         if (keysym == Clutter.Left)
             this._select(this._previous());
         else
             this._select(this._next());
 
         return Clutter.EVENT_STOP;
-    },
+    }
 
-    _finish: function() {
+    _finish() {
         Main.wm.actionMoveWorkspace(this._switcherList.selectWorkspaces[this._selectedIndex]);
 
         let activeWs = global.workspace_manager.get_active_workspace();
         popupList.moveToTop(activeWs.index());
 
-        this.parent();
+        super._finish();
     }
 });
 
-const WorkSpaceList = new Lang.Class({
-    Name: 'WorkSpaceList',
-    Extends: SwitcherPopup.SwitcherList,
-
-    _init : function() {
-        this.parent(true);
+var WorkSpaceList = GObject.registerClass(
+class WorkSpaceList extends SwitcherPopup.SwitcherList {
+    _init() {
+        super._init(true);
 
         this._label = new St.Label({ x_align: Clutter.ActorAlign.CENTER,
                                      y_align: Clutter.ActorAlign.CENTER });
-        this.actor.add_actor(this._label);
+        this.add_actor(this._label);
 
         this.icons = [];
 
-        this.workspaces = this.getWorkSpace();
+        this.workspaces = this._getWorkSpace();
         this.selectWorkspaces = [];
 
         let popup = popupList._popupList.slice();
@@ -202,14 +193,14 @@ const WorkSpaceList = new Lang.Class({
             let workspace_index = popup.pop();
             this.selectWorkspaces[i] = this.workspaces[workspace_index];
 
-            let icon = new WindowIcon(Number(workspace_index));
+            let icon = new WorkspaceIcon(Number(workspace_index));
 
-            this.addItem(icon.actor, icon.label);
+            this.addItem(icon, icon.label);
             this.icons.push(icon);
         }
-    },
+    }
 
-    getWorkSpace: function() {
+    _getWorkSpace() {
         let activeWs = global.workspace_manager.get_active_workspace();
         let activeIndex = activeWs.index();
         let ws = [];
@@ -225,57 +216,70 @@ const WorkSpaceList = new Lang.Class({
         }
 
         return ws;
-    },
+    }
 
-    _getPreferredHeight: function(actor, forWidth, alloc) {
-        this.parent(actor, forWidth, alloc);
+    vfunc_get_preferred_height(forWidth) {
+        let [minHeight, natHeight] = super.vfunc_get_preferred_height(forWidth);
 
-        let spacing = this.actor.get_theme_node().get_padding(St.Side.BOTTOM);
+        let spacing = this.get_theme_node().get_padding(St.Side.BOTTOM);
+        let [labelMin, labelNat] = this._label.get_preferred_height(-1);
 
-        alloc.min_size += spacing;
-        alloc.natural_size += spacing;
-    },
+        minHeight += labelMin + spacing;
+        natHeight += labelNat + spacing;
 
-    _allocateTop: function(actor, box, flags) {
+        return [minHeight, natHeight];
+    }
+
+    vfunc_allocate(box, flags) {
+        let themeNode = this.get_theme_node();
+        let contentBox = themeNode.get_content_box(box);
+
         let childBox = new Clutter.ActorBox();
-        childBox.x1 = box.x1;
-        childBox.x2 = box.x2;
-        childBox.y2 = box.y2;
+        childBox.x1 = contentBox.x1;
+        childBox.x2 = contentBox.x2;
+        childBox.y2 = contentBox.y2;
         childBox.y1 = childBox.y2 - this._label.height;
         this._label.allocate(childBox, flags);
 
-        let spacing = this.actor.get_theme_node().get_padding(St.Side.BOTTOM);
-        box.y2 -= this._label.height + spacing;
-        this.parent(actor, box, flags);
-    },
+        let totalLabelHeight = this._label.height + themeNode.get_padding(St.Side.BOTTOM)
+        childBox.x1 = box.x1;
+        childBox.x2 = box.x2;
+        childBox.y1 = box.y1;
+        childBox.y2 = box.y2 - totalLabelHeight;
+        super.vfunc_allocate(childBox, flags);
 
-    highlight: function(index, justOutline) {
-        this.parent(index, justOutline);
+        // Hooking up the parent vfunc will call this.set_allocation() with
+        // the height without the label height, so call it again with the
+        // correct size here.
+        this.set_allocation(box, flags);
+    }
+
+    highlight(index, justOutline) {
+        super.highlight(index, justOutline);
 
         this._label.set_text(index == -1 ? '' : this.icons[index].label.text);
     }
 });
 
-const WindowIcon = new Lang.Class({
-    Name: 'WindowIcon',
+var WorkspaceIcon = GObject.registerClass(
+class WorkspaceIcon extends St.BoxLayout {
+    _init(workspace_index) {
+        super._init({ style_class: 'alt-tab-app',
+                      vertical: true });
 
-    _init: function(workspace_index) {
         let settings = Convenience.getSettings(SCHEMA_NAME);
         let workspaceName = workspace.workspaceName[workspace_index + 1];
         if (workspaceName == null || workspaceName == '')
             workspaceName = "WorkSpace" + " " + String(workspace_index + 1);
         this.label = new St.Label({ text: workspaceName });
 
-        this.actor = new St.BoxLayout({ style_class: 'alt-tab-app',
-                                        vertical: true });
-
         this._icon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
-
-        this.actor.add(this._icon, { x_fill: false, y_fill: false});
+        this.add(this._icon, { x_fill: true, y_fill: true});
 
         this._icon.destroy_all_children();
 
-        this._porthole = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
+        this._porthole = { width: global.stage.width, height: global.stage.height,
+                           x: global.stage.x, y: global.stage.y };
 
         let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
         let windowSize = WINDOW_PREVIEW_SIZE * scaleFactor;
@@ -284,25 +288,21 @@ const WindowIcon = new Lang.Class({
                                 windowSize / this._porthole.height);
 
         let metaWorkspace = global.workspace_manager.get_workspace_by_index(workspace_index);
-        let thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
-        thumbnail.actor.set_scale(scale, scale);
+        this.thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
 
-        let workspaceIcon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
+        this.thumbnail.setPorthole(this._porthole.x, this._porthole.y,
+                                  this._porthole.width, this._porthole.height);
 
-        workspaceIcon.add_actor(thumbnail.actor);
-        if (this._porthole.width >= this._porthole.height)
-            workspaceIcon.set_size(windowSize, windowSize * (this._porthole.height / this._porthole.width));
-        else
-            workspaceIcon.set_size(windowSize * (this._porthole.width / this._porthole.height), windowSize);
+        this.thumbnail._contents.set_scale(scale, scale);
 
-        this._icon.add_actor(workspaceIcon);
+        this._icon.add_actor(this.thumbnail.actor);
 
         this._icon.add_actor(this._createNumberIcon(workspace_index + 1));
 
         this._icon.set_size(windowSize, windowSize);
-    },
+    }
 
-    _createNumberIcon: function(number) {
+    _createNumberIcon(number) {
         let icon = new St.Widget({ x_expand: true,
                                    y_expand: true,
                                    x_align:  Clutter.ActorAlign.END,
