@@ -43,6 +43,7 @@ var Frame = class Frame {
         this.widget = this._builder.get_object('settings_notebook');
 
         this._settings = Convenience.getSettings(SCHEMA_NAME);
+        this.desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
 
         let bindings_box = this._builder.get_object('key_bindings');
         bindings_box.add(this.keybindingBox(this._settings));
@@ -99,8 +100,21 @@ var Frame = class Frame {
     }
 
     radioToggled(button) {
-        if (button.get_active()) {
-            this._settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, [button.key]);
+        if (!(button.get_active()))
+            return;
+
+        this._settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, [button.key]);
+
+        switch (button.key) {
+        case '<Alt>Above_Tab':
+            this.desktopSettings.set_strv('switch-group', ['<Super>Above_Tab']);
+            break;
+        case '<Super>Above_Tab':
+            this.desktopSettings.set_strv('switch-group', ['<Alt>Above_Tab']);
+            break;
+        case '<Control>Above_Tab':
+            this.desktopSettings.set_strv('switch-group', ['<Alt>Above_Tab', '<Super>Above_Tab']);
+            break;
         }
     }
 };
