@@ -80,6 +80,12 @@ const Frame = new Lang.Class({
         button3.key = '<Control>Above_Tab';
         box.pack_start(button3, false, false, 0);
 
+        let button4 = new Gtk.RadioButton({ group: button1,
+                                            margin_left: 15,
+                                            label: 'Super + Tab' });
+        button4.key = '<Super>Tab';
+        box.pack_start(button4, false, false, 0);
+
         let [key] = this._settings.get_strv(SETTING_KEY_SWITCH_WORKSPACE);
         switch (key) {
         case '<Alt>Above_Tab':
@@ -91,11 +97,15 @@ const Frame = new Lang.Class({
         case '<Control>Above_Tab':
             button3.set_active(true);
             break;
+        case '<Super>Tab':
+            button4.set_active(true);
+            break;
         }
 
         button1.connect("toggled", Lang.bind(this, this.radioToggled))
         button2.connect("toggled", Lang.bind(this, this.radioToggled))
         button3.connect("toggled", Lang.bind(this, this.radioToggled))
+        button4.connect("toggled", Lang.bind(this, this.radioToggled))
 
         return box;
     },
@@ -106,6 +116,9 @@ const Frame = new Lang.Class({
 
         this._settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, [button.key]);
 
+        this.desktopSettings.reset('switch-group');
+        this.desktopSettings.reset('switch-applications');
+
         switch (button.key) {
         case '<Alt>Above_Tab':
             this.desktopSettings.set_strv('switch-group', ['<Super>Above_Tab']);
@@ -113,8 +126,10 @@ const Frame = new Lang.Class({
         case '<Super>Above_Tab':
             this.desktopSettings.set_strv('switch-group', ['<Alt>Above_Tab']);
             break;
+        case '<Super>Tab':
+            this.desktopSettings.set_strv('switch-applications', ['<Alt>Tab']);
+            break;
         case '<Control>Above_Tab':
-            this.desktopSettings.set_strv('switch-group', ['<Alt>Above_Tab', '<Super>Above_Tab']);
             break;
         }
     },
