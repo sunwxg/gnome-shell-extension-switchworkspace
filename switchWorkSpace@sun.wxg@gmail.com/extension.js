@@ -80,7 +80,7 @@ var WorkSpace = class WorkSpace {
         let tabPopup = new WorkSpacePopup();
 
         if (!tabPopup.show(binding.is_reversed(), binding.get_name(), binding.get_mask())) {
-            tabPopup.destroy();
+            //tabPopup.destroy();
         }
     }
 
@@ -295,7 +295,7 @@ class WorkspaceIcon extends St.BoxLayout {
 
         this.thumbnail._contents.set_scale(scale, scale);
 
-        this._icon.add_actor(this.thumbnail.actor);
+        this._icon.add_actor(this.thumbnail);
 
         this._icon.add_actor(this._createNumberIcon(workspace_index + 1));
 
