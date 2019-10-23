@@ -274,31 +274,32 @@ class WorkspaceIcon extends St.BoxLayout {
         this.label = new St.Label({ text: workspaceName });
 
         this._icon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
-        this.add(this._icon, { x_fill: true, y_fill: true});
-
         this._icon.destroy_all_children();
+        this.add(this._icon, { x_fill: false, y_fill: false});
 
-        this._porthole = { width: global.stage.width, height: global.stage.height,
-                           x: global.stage.x, y: global.stage.y };
-
+        let workArea = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
+        this._porthole = { width: workArea.width, height: workArea.height,
+                           x: workArea.x, y: workArea.y };
         let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
         let windowSize = WINDOW_PREVIEW_SIZE * scaleFactor;
-
         let scale = Math.min(1.0, windowSize / this._porthole.width,
                                 windowSize / this._porthole.height);
 
         let metaWorkspace = global.workspace_manager.get_workspace_by_index(workspace_index);
         this.thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
-
-        this.thumbnail.setPorthole(this._porthole.x, this._porthole.y,
+        this.thumbnail.setPorthole(this._porthole.x * scale, this._porthole.y * scale,
                                   this._porthole.width, this._porthole.height);
-
         this.thumbnail._contents.set_scale(scale, scale);
 
-        this._icon.add_actor(this.thumbnail);
+        let icon = new St.Widget({ x_expand: true,
+                                   y_expand: true,
+                                   y_align:  Clutter.ActorAlign.CENTER });
+        icon.add_actor(this.thumbnail);
+        let [w, h] = this.thumbnail.get_size();
+        icon.set_size(w * scale, h * scale);
+        this._icon.add_actor(icon);
 
         this._icon.add_actor(this._createNumberIcon(workspace_index + 1));
-
         this._icon.set_size(windowSize, windowSize);
     }
 
