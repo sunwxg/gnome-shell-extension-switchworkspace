@@ -275,7 +275,7 @@ class WorkspaceIcon extends St.BoxLayout {
 
         this._icon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
         this._icon.destroy_all_children();
-        this.add(this._icon, { x_fill: false, y_fill: false});
+        this.add(this._icon);
 
         let workArea = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
         this._porthole = { width: workArea.width, height: workArea.height,
