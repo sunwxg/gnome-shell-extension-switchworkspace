@@ -17,7 +17,6 @@ const Extension = imports.misc.extensionUtils.getCurrentExtension();
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
 
 const WINDOW_PREVIEW_SIZE = 128;
 const APP_ICON_SIZE_SMALL = 48;
@@ -34,7 +33,7 @@ const SETTING_KEY_WORKSPACE_NAME = {
 
 var WorkSpace = class WorkSpace {
     constructor() {
-        this._settings = Convenience.getSettings(SCHEMA_NAME);
+        this._settings = ExtensionUtils.getSettings(SCHEMA_NAME);
 
         this.addKeybinding();
 
@@ -285,7 +284,7 @@ class WorkspaceIcon extends St.BoxLayout {
         super._init({ style_class: 'alt-tab-app',
                       vertical: true });
 
-        let settings = Convenience.getSettings(SCHEMA_NAME);
+        let settings = ExtensionUtils.getSettings(SCHEMA_NAME);
         let workspaceName = workspace.workspaceName[workspace_index + 1];
         if (workspaceName == null || workspaceName == '')
             workspaceName = "WorkSpace" + " " + String(workspace_index + 1);

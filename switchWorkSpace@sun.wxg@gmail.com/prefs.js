@@ -8,7 +8,6 @@ const _ = Gettext.gettext;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
 
 const COLUMN_ID          = 0;
 const COLUMN_DESCRIPTION = 1;
@@ -26,7 +25,6 @@ const SETTING_KEY_WORKSPACE_NAME = {
       };
 
 function init() {
-    //Convenience.initTranslations();
 }
 
 function buildPrefsWidget() {
@@ -43,7 +41,7 @@ var Frame = class Frame {
 
         this.widget = this._builder.get_object('settings_notebook');
 
-        this._settings = Convenience.getSettings(SCHEMA_NAME);
+        this._settings = ExtensionUtils.getSettings(SCHEMA_NAME);
         this.desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
 
         let bindings_box = this._builder.get_object('key_bindings');
