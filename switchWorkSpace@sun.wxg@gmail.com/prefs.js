@@ -17,6 +17,7 @@ const COLUMN_MODS        = 3;
 
 const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
+const SETTING_KEY_SWITCH_WORKSPACE_BACKWARD = 'switch-workspace-backward';
 const SETTING_KEY_WORKSPACE_NAME = {
        1 : 'workspace1-name',
        2 : 'workspace2-name',
@@ -114,19 +115,29 @@ var Frame = class Frame {
             return;
 
         this._settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE, [button.key]);
+        this._settings.set_strv(SETTING_KEY_SWITCH_WORKSPACE_BACKWARD, ['<Shift>' + button.key]);
 
         this.desktopSettings.reset('switch-group');
+        this.desktopSettings.reset('switch-group-backward');
         this.desktopSettings.reset('switch-applications');
+        this.desktopSettings.reset('switch-applications-backward');
+        this.desktopSettings.reset('switch-windows');
+        this.desktopSettings.reset('switch-windows-backward');
 
         switch (button.key) {
         case '<Alt>Above_Tab':
             this.desktopSettings.set_strv('switch-group', ['<Super>Above_Tab']);
+            this.desktopSettings.set_strv('switch-group-backward', ['<Shift><Super>Above_Tab']);
             break;
         case '<Super>Above_Tab':
             this.desktopSettings.set_strv('switch-group', ['<Alt>Above_Tab']);
+            this.desktopSettings.set_strv('switch-group-backward', ['<Shift><Alt>Above_Tab']);
             break;
         case '<Super>Tab':
             this.desktopSettings.set_strv('switch-applications', ['<Alt>Tab']);
+            this.desktopSettings.set_strv('switch-applications-backward', ['<Shift><Alt>Tab']);
+            this.desktopSettings.set_strv('switch-windows', ['<Alt>Tab']);
+            this.desktopSettings.set_strv('switch-windows-backward', ['<Shift><Alt>Tab']);
             break;
         case '<Control>Above_Tab':
             break;

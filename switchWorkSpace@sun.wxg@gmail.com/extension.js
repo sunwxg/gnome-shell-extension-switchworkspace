@@ -24,6 +24,7 @@ const APP_ICON_SIZE_SMALL = 48;
 
 const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
+const SETTING_KEY_SWITCH_WORKSPACE_BACKWARD = 'switch-workspace-backward';
 const SETTING_KEY_WORKSPACE_NAME = {
        1 : 'workspace1-name',
        2 : 'workspace2-name',
@@ -63,21 +64,29 @@ var WorkSpace = class WorkSpace {
         let ModeType = Shell.hasOwnProperty('ActionMode') ?
                        Shell.ActionMode : Shell.KeyBindingMode;
 
-        Main.wm.addKeybinding(SETTING_KEY_SWITCH_WORKSPACE,
+        this._keyBindingAction =
+            Main.wm.addKeybinding(SETTING_KEY_SWITCH_WORKSPACE,
                               this._settings,
                               Meta.KeyBindingFlags.NONE,
+                              ModeType.ALL,
+                              this._switchWorkspace.bind(this));
+        this._keyBindingActionBackward =
+            Main.wm.addKeybinding(SETTING_KEY_SWITCH_WORKSPACE_BACKWARD,
+                              this._settings,
+                              Meta.KeyBindingFlags.IS_REVERSED,
                               ModeType.ALL,
                               this._switchWorkspace.bind(this));
     }
 
     unbindingKey() {
         Main.wm.removeKeybinding(SETTING_KEY_SWITCH_WORKSPACE);
+        Main.wm.removeKeybinding(SETTING_KEY_SWITCH_WORKSPACE_BACKWARD);
     }
 
     _switchWorkspace(display, window, binding) {
         popupList.update();
 
-        let tabPopup = new WorkSpacePopup();
+        let tabPopup = new WorkSpacePopup(this._keyBindingAction, this._keyBindingActionBackward);
 
         if (!tabPopup.show(binding.is_reversed(), binding.get_name(), binding.get_mask())) {
             //tabPopup.destroy();
@@ -148,18 +157,27 @@ var PopupList = class PopupList {
 
 var WorkSpacePopup = GObject.registerClass(
 class WorkSpacePopup extends SwitcherPopup.SwitcherPopup {
-    _init() {
+    _init(action, actionBackward) {
         super._init();
+
+        this._action = action;
+        this._actionBackward = actionBackward;
 
         this._switcherList = new WorkSpaceList();
         this._items = this._switcherList.icons;
     }
 
     _keyPressHandler(keysym, action) {
-        if (keysym == Clutter.Left)
-            this._select(this._previous());
-        else
+        if (action == this._action)
             this._select(this._next());
+        else if (action == this._actionBackward)
+            this._select(this._previous());
+        else if (keysym == Clutter.KEY_Left)
+            this._select(this._previous());
+        else if (keysym == Clutter.KEY_Right)
+            this._select(this._next());
+        else
+            return Clutter.EVENT_PROPAGATE;
 
         return Clutter.EVENT_STOP;
     }
