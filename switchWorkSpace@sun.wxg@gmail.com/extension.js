@@ -24,6 +24,7 @@ const APP_ICON_SIZE_SMALL = 48;
 const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
 const SETTING_KEY_SWITCH_WORKSPACE_BACKWARD = 'switch-workspace-backward';
+const SETTING_KEY_HIDE_EMPTY = 'hide-empty';
 const SETTING_KEY_WORKSPACE_NAME = {
        1 : 'workspace1-name',
        2 : 'workspace2-name',
@@ -34,6 +35,7 @@ const SETTING_KEY_WORKSPACE_NAME = {
 var WorkSpace = class WorkSpace {
     constructor() {
         this._settings = ExtensionUtils.getSettings(SCHEMA_NAME);
+        this._settingsMutter = ExtensionUtils.getSettings("org.gnome.mutter");
 
         this.addKeybinding();
 
@@ -43,6 +45,22 @@ var WorkSpace = class WorkSpace {
         for (let i in SETTING_KEY_WORKSPACE_NAME) {
             this.workspaceNameBinding(i);
         }
+
+        this.hideEmpty = this._settings.get_boolean(SETTING_KEY_HIDE_EMPTY);
+        this.hideEmptyID = this._settings.connect('changed::' + SETTING_KEY_HIDE_EMPTY,
+            () => { this.hideEmpty = this._settings.get_boolean(SETTING_KEY_HIDE_EMPTY); });
+
+        this.dynamicWorkspace = this._settingsMutter.get_boolean('dynamic-workspaces');
+        this.dynamicWorkspaceID = this._settingsMutter.connect('changed::' + 'dynamic-workspaces',
+            () => { this.dynamicWorkspace = this._settingsMutter.get_boolean('dynamic-workspaces'); });
+    }
+
+    getWorkspaceNumber() {
+        let numberWorkspace = global.workspace_manager.n_workspaces;
+        if (this.hideEmpty && this.dynamicWorkspace)
+            numberWorkspace--;
+
+        return numberWorkspace;
     }
 
     workspaceNameBinding(index) {
@@ -98,6 +116,11 @@ var WorkSpace = class WorkSpace {
         for (let i in SETTING_KEY_WORKSPACE_NAME) {
             this.workspaceNameUnBinding(i);
         }
+
+        if (this.hideEmptyID)
+            this._settings.disconnect(this.hideEmptyID);
+        if (this.dynamicWorkspaceID)
+            this._settingsMutter.disconnect(this.dynamicWorkspaceID);
     }
 };
 
@@ -110,7 +133,7 @@ var PopupList = class PopupList {
         let activeWs = global.workspace_manager.get_active_workspace();
         this._popupList.push(activeWs.index());
 
-        for (let i = 0; i < global.workspace_manager.n_workspaces; i++) {
+        for (let i = 0; i < workspace.getWorkspaceNumber(); i++) {
             if (i === activeWs.index())
                 continue;
             this._popupList.push(i);
@@ -128,16 +151,17 @@ var PopupList = class PopupList {
                 this.moveToTop(activeWsIndex);
             }
 
-            if (this._popupList.length > global.workspace_manager.n_workspaces) {
-                let index = this._popupList.indexOf(global.workspace_manager.n_workspaces);
+            let numberWorkspace = workspace.getWorkspaceNumber();
+            if (this._popupList.length > numberWorkspace) {
+                let index = this._popupList.indexOf(numberWorkspace);
                 if (index > -1) {
                     this._popupList.splice(index, 1);
                 }
             }
 
-            if (this._popupList.length < global.workspace_manager.n_workspaces) {
+            if (this._popupList.length < numberWorkspace) {
                 this._popupList.reverse();
-                this._popupList.push(global.workspace_manager.n_workspaces - 1);
+                this._popupList.push(numberWorkspace - 1);
                 this._popupList.reverse();
             }
         }
@@ -206,7 +230,7 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
         this.selectWorkspaces = [];
 
         let popup = popupList._popupList.slice();
-        for (let i = 0; i < global.workspace_manager.n_workspaces; i++) {
+        for (let i = 0; i < workspace.getWorkspaceNumber(); i++) {
             let workspace_index = popup.pop();
             this.selectWorkspaces[i] = this.workspaces[workspace_index];
 
@@ -228,7 +252,7 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
             ws[i] = ws[i + 1].get_neighbor(Meta.MotionDirection.UP);
         }
 
-        for (let i = activeIndex + 1; i < global.workspace_manager.n_workspaces; i++) {
+        for (let i = activeIndex + 1; i < workspace.getWorkspaceNumber(); i++) {
             ws[i] = ws[i - 1].get_neighbor(Meta.MotionDirection.DOWN);
         }
 

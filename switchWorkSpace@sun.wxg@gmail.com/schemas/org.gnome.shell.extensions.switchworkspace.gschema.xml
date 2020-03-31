@@ -24,6 +24,12 @@
     <key name="workspace4-name" type="s">
       <default>''</default>
     </key>
+    <key name="hide-empty" type="b">
+      <default>false</default>
+      <summary>Key to hide empty workspace</summary>
+      <description>
+      </description>
+    </key>
   </schema>
 </schemalist>
 

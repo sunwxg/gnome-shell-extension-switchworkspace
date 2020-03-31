@@ -17,6 +17,7 @@ const COLUMN_MODS        = 3;
 const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
 const SETTING_KEY_SWITCH_WORKSPACE_BACKWARD = 'switch-workspace-backward';
+const SETTING_KEY_HIDE_EMPTY = 'hide-empty';
 const SETTING_KEY_WORKSPACE_NAME = {
        1 : 'workspace1-name',
        2 : 'workspace2-name',
@@ -45,7 +46,9 @@ var Frame = class Frame {
         this.desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
 
         let bindings_box = this._builder.get_object('key_bindings');
-        bindings_box.add(this.keybindingBox(this._settings));
+        bindings_box.add(this.keybindingBox());
+
+        this.hideEmptyWorkspace();
 
         for (let i in SETTING_KEY_WORKSPACE_NAME) {
             this.workspaceNameBinding(i);
@@ -59,8 +62,14 @@ var Frame = class Frame {
             this._settings.set_string(SETTING_KEY_WORKSPACE_NAME[index], entry.get_text()); });
     }
 
+    hideEmptyWorkspace() {
+        let button = this._builder.get_object('hide_empty_workspace');
+        button.active = this._settings.get_boolean(SETTING_KEY_HIDE_EMPTY);
+        button.connect('notify::active', (button) => {
+            this._settings.set_boolean(SETTING_KEY_HIDE_EMPTY, button.active); });
+    }
 
-    keybindingBox(SettingsSchema) {
+    keybindingBox() {
         let box = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL });
         let button1 = new Gtk.RadioButton({ label: 'Alt + `' });
         button1.key = '<Alt>Above_Tab';
