@@ -311,7 +311,7 @@ class WorkspaceIcon extends St.BoxLayout {
         let settings = ExtensionUtils.getSettings(SCHEMA_NAME);
         let workspaceName = workspace.workspaceName[workspace_index + 1];
         if (workspaceName == null || workspaceName == '')
-            workspaceName = "WorkSpace" + " " + String(workspace_index + 1);
+            workspaceName = "Workspace" + " " + String(workspace_index + 1);
         this.label = new St.Label({ text: workspaceName });
 
         this._icon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
