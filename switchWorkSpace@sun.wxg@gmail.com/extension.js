@@ -271,7 +271,7 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
         return [minHeight, natHeight];
     }
 
-    vfunc_allocate(box, flags) {
+    vfunc_allocate(box) {
         let themeNode = this.get_theme_node();
         let contentBox = themeNode.get_content_box(box);
 
@@ -280,19 +280,19 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
         childBox.x2 = contentBox.x2;
         childBox.y2 = contentBox.y2;
         childBox.y1 = childBox.y2 - this._label.height;
-        this._label.allocate(childBox, flags);
+        this._label.allocate(childBox);
 
         let totalLabelHeight = this._label.height + themeNode.get_padding(St.Side.BOTTOM)
         childBox.x1 = box.x1;
         childBox.x2 = box.x2;
         childBox.y1 = box.y1;
         childBox.y2 = box.y2 - totalLabelHeight;
-        super.vfunc_allocate(childBox, flags);
+        super.vfunc_allocate(childBox);
 
         // Hooking up the parent vfunc will call this.set_allocation() with
         // the height without the label height, so call it again with the
         // correct size here.
-        this.set_allocation(box, flags);
+        this.set_allocation(box);
     }
 
     highlight(index, justOutline) {
