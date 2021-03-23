@@ -127,6 +127,8 @@ var WorkSpace = class WorkSpace {
 var PopupList = class PopupList {
     constructor() {
         this._popupList = [];
+        this._workspaceChangedID = global.workspace_manager.connect('active-workspace-changed',
+                                                                    this.update.bind(this));
     }
 
     create() {
@@ -175,6 +177,11 @@ var PopupList = class PopupList {
         }
 
         this._popupList.push(workspaceIndex);
+    }
+
+    destroy() {
+        if (this._workspaceChangedID)
+            global.workspace_manager.disconnect(this._workspaceChangedID);
     }
 };
 
@@ -375,4 +382,5 @@ function enable() {
 
 function disable() {
     workspace.destroy();
+    popupList.destroy();
 }
