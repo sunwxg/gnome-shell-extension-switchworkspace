@@ -1,25 +1,18 @@
-const Lang = imports.lang;
-const Gio = imports.gi.Gio;
 const GObject = imports.gi.GObject;
 const Shell = imports.gi.Shell;
-const GLib = imports.gi.GLib;
 const Meta = imports.gi.Meta;
 const Clutter = imports.gi.Clutter;
 const St = imports.gi.St;
-const Gtk = imports.gi.Gtk;
 
-const WindowManager = imports.ui.windowManager.WindowManager;
 const Main = imports.ui.main;
-const AltTab = imports.ui.altTab;
 const SwitcherPopup = imports.ui.switcherPopup;
 const WorkspaceThumbnail = imports.ui.workspaceThumbnail;
-const Extension = imports.misc.extensionUtils.getCurrentExtension();
+const Background = imports.ui.background;
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
 const WINDOW_PREVIEW_SIZE = 128;
-const APP_ICON_SIZE_SMALL = 48;
 
 const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
@@ -106,7 +99,7 @@ var WorkSpace = class WorkSpace {
         let tabPopup = new WorkSpacePopup(this._keyBindingAction, this._keyBindingActionBackward);
 
         if (!tabPopup.show(binding.is_reversed(), binding.get_name(), binding.get_mask())) {
-            //tabPopup.destroy();
+            tabPopup.destroy();
         }
     }
 
@@ -255,12 +248,20 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
 
         ws[activeIndex] = activeWs;
 
+        let wm = global.workspace_manager;
+        const vertical = wm.layout_rows === -1;
         for (let i = activeIndex - 1; i >= 0; i--) {
-            ws[i] = ws[i + 1].get_neighbor(Meta.MotionDirection.UP);
+            if (vertical)
+                ws[i] = ws[i + 1].get_neighbor(Meta.MotionDirection.UP);
+            else
+                ws[i] = ws[i + 1].get_neighbor(Meta.MotionDirection.LEFT);
         }
 
-        for (let i = activeIndex + 1; i < workspace.getWorkspaceNumber(); i++) {
-            ws[i] = ws[i - 1].get_neighbor(Meta.MotionDirection.DOWN);
+        for (let i = activeIndex + 1; i < wm.n_workspaces; i++) {
+            if (vertical)
+                ws[i] = ws[i - 1].get_neighbor(Meta.MotionDirection.DOWN);
+            else
+                ws[i] = ws[i - 1].get_neighbor(Meta.MotionDirection.RIGHT);
         }
 
         return ws;
@@ -282,14 +283,8 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
         let themeNode = this.get_theme_node();
         let contentBox = themeNode.get_content_box(box);
 
-        let childBox = new Clutter.ActorBox();
-        childBox.x1 = contentBox.x1;
-        childBox.x2 = contentBox.x2;
-        childBox.y2 = contentBox.y2;
-        childBox.y1 = childBox.y2 - this._label.height;
-        this._label.allocate(childBox);
-
         let totalLabelHeight = this._label.height + themeNode.get_padding(St.Side.BOTTOM)
+        let childBox = new Clutter.ActorBox();
         childBox.x1 = box.x1;
         childBox.x2 = box.x2;
         childBox.y1 = box.y1;
@@ -300,6 +295,13 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
         // the height without the label height, so call it again with the
         // correct size here.
         this.set_allocation(box);
+
+        childBox.x1 = contentBox.x1;
+        childBox.x2 = contentBox.x2;
+        childBox.y2 = contentBox.y2;
+        childBox.y1 = childBox.y2 - this._label.height;
+        this._label.allocate(childBox);
+
     }
 
     highlight(index, justOutline) {
@@ -315,6 +317,10 @@ class WorkspaceIcon extends St.BoxLayout {
         super._init({ style_class: 'alt-tab-app',
                       vertical: true });
 
+        this.metaWorkspace = global.workspace_manager.get_workspace_by_index(workspace_index);
+
+        this.connect('destroy', this._onDestroy.bind(this));
+
         let settings = ExtensionUtils.getSettings(SCHEMA_NAME);
         let workspaceName = workspace.workspaceName[workspace_index + 1];
         if (workspaceName == null || workspaceName == '')
@@ -323,32 +329,70 @@ class WorkspaceIcon extends St.BoxLayout {
 
         this._icon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
         this._icon.destroy_all_children();
-        this.add(this._icon);
+        this.add_actor(this._icon);
 
         let workArea = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
-        this._porthole = { width: workArea.width, height: workArea.height,
-                           x: workArea.x, y: workArea.y };
+        this._porthole = { width: workArea.width,
+                           height: workArea.height,
+                           x: workArea.x,
+                           y: workArea.y };
+
         let scaleFactor = St.ThemeContext.get_for_stage(global.stage).scale_factor;
         let windowSize = WINDOW_PREVIEW_SIZE * scaleFactor;
-        let scale = Math.min(1.0, windowSize / this._porthole.width,
-                                windowSize / this._porthole.height);
+        this.scale = Math.min(1.0, windowSize / this._porthole.width,
+                                   windowSize / this._porthole.height);
 
-        let metaWorkspace = global.workspace_manager.get_workspace_by_index(workspace_index);
-        this.thumbnail = new WorkspaceThumbnail.WorkspaceThumbnail(metaWorkspace);
-        this.thumbnail.setPorthole(this._porthole.x * scale, this._porthole.y * scale,
-                                  this._porthole.width, this._porthole.height);
-        this.thumbnail._contents.set_scale(scale, scale);
+        this._createBackground(Main.layoutManager.primaryIndex);
 
-        let icon = new St.Widget({ x_expand: true,
-                                   y_expand: true,
-                                   y_align:  Clutter.ActorAlign.CENTER });
-        icon.add_actor(this.thumbnail);
-        let [w, h] = this.thumbnail.get_size();
-        icon.set_size(w * scale, h * scale);
-        this._icon.add_actor(icon);
+        this._createWindowThumbnail();
 
         this._icon.add_actor(this._createNumberIcon(workspace_index + 1));
         this._icon.set_size(windowSize, windowSize);
+    }
+
+    _createWindowThumbnail() {
+        this._windowsThumbnail = new St.Widget({ 
+            x_expand: true,
+            y_expand: true,
+            y_align:  Clutter.ActorAlign.CENTER });
+
+        let windows = global.get_window_actors().filter(actor => {
+            let win = actor.meta_window;
+            return win.located_on_workspace(this.metaWorkspace);
+        });
+
+        for (let i = 0; i < windows.length; i++) {
+            if (this._isMyWindow(windows[i])) {
+                let clone = new WorkspaceThumbnail.WindowClone(windows[i]);
+                this._windowsThumbnail.add_actor(clone);
+            }
+        }
+
+        this._windowsThumbnail.set_size(this._porthole.width * this.scale,
+                                        this._porthole.height * this.scale);
+        this._windowsThumbnail.set_scale(this.scale, this.scale);
+        this._icon.add_actor(this._windowsThumbnail);
+    }
+
+    _isMyWindow(actor) {
+        let win = actor.meta_window;
+        return win.located_on_workspace(this.metaWorkspace) &&
+            (win.get_monitor() == Main.layoutManager.primaryIndex);
+    }
+
+    _createBackground(index) {
+        this._backgroundGroup = new Clutter.Actor({
+            layout_manager: new Clutter.BinLayout(),
+            x_expand: true,
+            y_expand: true,
+        });
+        this._icon.add_child(this._backgroundGroup);
+
+        this._bgManager = new Background.BackgroundManager({
+            container: this._backgroundGroup,
+            monitorIndex: index,
+            controlPosition: false,
+        });
     }
 
     _createNumberIcon(number) {
@@ -366,6 +410,13 @@ class WorkspaceIcon extends St.BoxLayout {
         box.add(label);
 
         return icon;
+    }
+
+    _onDestroy() {
+        if (this._bgManager) {
+            this._bgManager.destroy();
+            this._bgManager = null;
+        }
     }
 });
 

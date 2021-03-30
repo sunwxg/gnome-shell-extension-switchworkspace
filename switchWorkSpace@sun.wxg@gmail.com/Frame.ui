@@ -1,154 +1,116 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.22.2 -->
 <interface>
-  <requires lib="gtk+" version="3.18"/>
+  <requires lib="gtk+" version="4.0"/>
   <object class="GtkNotebook" id="settings_notebook">
     <property name="visible">True</property>
     <property name="can_focus">True</property>
-    <property name="margin_left">6</property>
-    <property name="margin_right">6</property>
+    <property name="margin_start">6</property>
+    <property name="margin_end">6</property>
     <property name="margin_top">6</property>
     <property name="margin_bottom">6</property>
     <child>
       <object class="GtkBox" id="settings_key_bindings">
-        <property name="width_request">550</property>
-        <property name="can_focus">False</property>
+        <property name="can_focus">True</property>
         <property name="halign">start</property>
         <property name="hexpand">True</property>
-        <property name="vexpand">True</property>
+        <property name="margin_start">6</property>
+        <property name="margin_end">6</property>
         <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
             <property name="halign">start</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
             <property name="margin_top">20</property>
             <property name="label" translatable="yes">Switch Workspace Keybinding</property>
             <attributes>
               <attribute name="weight" value="bold"/>
             </attributes>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
-          <object class="GtkHSeparator">
+          <object class="GtkSeparator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
+            <property name="hexpand">True</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
             <property name="margin_top">5</property>
             <property name="margin_bottom">5</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
         </child>
         <child>
           <object class="GtkBox" id="key_bindings">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
         </child>
         <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
             <property name="margin_top">20</property>
             <child>
               <object class="GtkLabel">
-                <property name="visible">True</property>
+                <property name="hexpand">True</property>
+                <property name="halign">start</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Hide empty workspace</property>
                 <attributes>
                   <attribute name="weight" value="bold"/>
                 </attributes>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
             <child>
               <object class="GtkSwitch" id="hide_empty_workspace">
+                <property name="margin_start">6</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
               </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="pack_type">end</property>
-                <property name="position">1</property>
-              </packing>
             </child>
             <child>
               <placeholder/>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
-          </packing>
         </child>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="halign">start</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
             <property name="margin_top">20</property>
             <property name="label" translatable="yes">Workspace Name</property>
             <attributes>
               <attribute name="weight" value="bold"/>
             </attributes>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">4</property>
-          </packing>
         </child>
         <child>
-          <object class="GtkHSeparator">
+          <object class="GtkSeparator">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
             <property name="margin_top">5</property>
             <property name="margin_bottom">5</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">5</property>
-          </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="workspace1">
-            <property name="width_request">550</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
+          <object class="GtkBox" id="workspace1">
+            <property name="can_focus">True</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
             <property name="hexpand">True</property>
             <child>
               <object class="GtkLabel">
@@ -157,37 +119,23 @@
                 <property name="label" translatable="yes">workspace 1</property>
                 <property name="xalign">0</property>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
             <child>
               <object class="GtkEntry" id="workspace1-name">
+                <property name="editable">True</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
+                <property name="margin_start">6</property>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">6</property>
-          </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="workspace2">
-            <property name="width_request">550</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
+          <object class="GtkBox" id="workspace2">
+            <property name="can_focus">True</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
             <property name="hexpand">True</property>
             <child>
               <object class="GtkLabel">
@@ -196,37 +144,23 @@
                 <property name="label" translatable="yes">workspace 2</property>
                 <property name="xalign">0</property>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
             <child>
               <object class="GtkEntry" id="workspace2-name">
+                <property name="editable">True</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
+                <property name="margin_start">6</property>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">7</property>
-          </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="workspace3">
-            <property name="width_request">550</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
+          <object class="GtkBox" id="workspace3">
+            <property name="can_focus">True</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
             <property name="hexpand">True</property>
             <child>
               <object class="GtkLabel">
@@ -235,37 +169,23 @@
                 <property name="label" translatable="yes">workspace 3</property>
                 <property name="xalign">0</property>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
             <child>
               <object class="GtkEntry" id="workspace3-name">
+                <property name="editable">True</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
+                <property name="margin_start">6</property>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">8</property>
-          </packing>
         </child>
         <child>
-          <object class="GtkHBox" id="workspace4">
-            <property name="width_request">550</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">6</property>
-            <property name="margin_right">6</property>
+          <object class="GtkBox" id="workspace4">
+            <property name="can_focus">True</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
             <property name="hexpand">True</property>
             <child>
               <object class="GtkLabel">
@@ -274,41 +194,19 @@
                 <property name="label" translatable="yes">workspace 4</property>
                 <property name="xalign">0</property>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
-              </packing>
             </child>
             <child>
               <object class="GtkEntry" id="workspace4-name">
+                <property name="editable">True</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="hexpand">True</property>
+                <property name="margin_start">6</property>
               </object>
-              <packing>
-                <property name="expand">True</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
             </child>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">9</property>
-          </packing>
-        </child>
-        <child>
-          <placeholder/>
-        </child>
-        <child>
-          <placeholder/>
         </child>
       </object>
-      <packing>
-        <property name="position">1</property>
-      </packing>
     </child>
     <child type="tab">
       <object class="GtkLabel" id="settings">
@@ -316,10 +214,6 @@
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">Settings</property>
       </object>
-      <packing>
-        <property name="position">1</property>
-        <property name="tab_fill">False</property>
-      </packing>
     </child>
     <child>
       <object class="GtkBox" id="about">
@@ -327,7 +221,6 @@
         <property name="margin_top">24</property>
         <property name="margin_bottom">24</property>
         <property name="hexpand">True</property>
-        <property name="vexpand">True</property>
         <property name="orientation">vertical</property>
         <property name="spacing">5</property>
         <child>
@@ -337,11 +230,6 @@
             <property name="label">Created by Xiaoguang Wang</property>
             <property name="use_markup">True</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
         </child>
         <child>
           <object class="GtkLabel">
@@ -350,11 +238,6 @@
             <property name="label">(&lt;a href="mailto:sun.wxg@gmail.com"&gt;sun.wxg@gmail.com&lt;/a&gt;)</property>
             <property name="use_markup">True</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
         </child>
         <child>
           <object class="GtkLinkButton">
@@ -362,21 +245,11 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="events"/>
             <property name="halign">center</property>
-            <property name="relief">none</property>
             <property name="uri">https://github.com/sunwxg/gnome-shell-extension-switchworkspace</property>
           </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
         </child>
       </object>
-      <packing>
-        <property name="position">1</property>
-      </packing>
     </child>
     <child type="tab">
       <object class="GtkLabel" id="about_label">
@@ -384,10 +257,6 @@
         <property name="can_focus">False</property>
         <property name="label" translatable="yes">About</property>
       </object>
-      <packing>
-        <property name="position">2</property>
-        <property name="tab_fill">False</property>
-      </packing>
     </child>
   </object>
 </interface>
