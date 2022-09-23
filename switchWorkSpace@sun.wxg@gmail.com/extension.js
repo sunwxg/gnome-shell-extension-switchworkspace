@@ -433,5 +433,8 @@ function enable() {
 
 function disable() {
     workspace.destroy();
+    workspace = null;
+
     popupList.destroy();
+    popupList = null;
 }
