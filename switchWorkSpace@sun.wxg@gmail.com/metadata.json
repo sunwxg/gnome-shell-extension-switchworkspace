@@ -1,16 +1,13 @@
 {
-  "description": "Switch workspace like using ALT+TAB key to switch windows \n\n Default shortcut key to switch workspace is Ctrl+Above_Tab .",
+  "uuid": "switchWorkSpace@sun.wxg@gmail.com",
+  "extension-id": "switch-workspace",
+  "settings-schema": "org.gnome.shell.extensions.switchWorkSpace",
+  "gettext-domain": "gnome-shell-extensions",
   "name": "Switch Workspace",
-  "original-authors": [
-    "sun.wxg@gmail.com"
-  ],
+  "description": "Switch workspace like using ALT+TAB key to switch windows \n\n Default shortcut key to switch workspace is Ctrl+Above_Tab .",
   "shell-version": [
-    "40",
-    "41",
-    "42",
-    "43",
-    "44"
+    "45"
   ],
-  "url": "https://github.com/sunwxg/gnome-shell-extension-switchworkspace",
-  "uuid": "switchWorkSpace@sun.wxg@gmail.com"
+  "original-authors": "sun.wxg@gmail.com",
+  "url": "https://github.com/sunwxg/gnome-shell-extension-switchworkspace"
 }

@@ -1,8 +1,7 @@
-const Gio = imports.gi.Gio;
-const Gtk = imports.gi.Gtk;
+import Gio from 'gi://Gio';
+import Gtk from 'gi://Gtk';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+import {ExtensionPreferences, gettext as _} from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
 const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
@@ -15,22 +14,19 @@ const SETTING_KEY_WORKSPACE_NAME = {
        4 : 'workspace4-name',
       };
 
-function init() {
-}
-
-function buildPrefsWidget() {
-    let frame = new Frame();
+function buildPrefsWidget(settings, dir) {
+    let frame = new Frame(settings, dir);
     return frame.widget;
 }
 
 var Frame = class Frame {
-    constructor() {
+    constructor(settings, dir) {
+        this._settings = settings;
         this._builder = new Gtk.Builder();
-        this._builder.add_from_file(Me.path + '/Frame.ui');
+        this._builder.add_from_file(dir.get_path() + '/Frame.ui');
 
         this.widget = this._builder.get_object('settings_notebook');
 
-        this._settings = ExtensionUtils.getSettings(SCHEMA_NAME);
         this.desktopSettings = new Gio.Settings({ schema_id: 'org.gnome.desktop.wm.keybindings' });
 
         let bindings_box = this._builder.get_object('key_bindings');
@@ -139,3 +135,9 @@ var Frame = class Frame {
         }
     }
 };
+
+export default class SwitchWorkspacePrefs extends ExtensionPreferences {
+    getPreferencesWidget() {
+        return buildPrefsWidget(this.getSettings(), this.dir);
+    }
+}

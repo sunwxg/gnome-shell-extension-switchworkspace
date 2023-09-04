@@ -1,20 +1,18 @@
-const GObject = imports.gi.GObject;
-const Shell = imports.gi.Shell;
-const Meta = imports.gi.Meta;
-const Clutter = imports.gi.Clutter;
-const St = imports.gi.St;
+import Clutter from 'gi://Clutter';
+import GObject from 'gi://GObject';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+import St from 'gi://St';
 
-const Main = imports.ui.main;
-const SwitcherPopup = imports.ui.switcherPopup;
-const WorkspaceThumbnail = imports.ui.workspaceThumbnail;
-const Background = imports.ui.background;
+import {Extension, gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as SwitcherPopup from 'resource:///org/gnome/shell/ui/switcherPopup.js';
+import * as WorkspaceThumbnail from 'resource:///org/gnome/shell/ui/workspaceThumbnail.js';
+import * as Background from 'resource:///org/gnome/shell/ui/background.js';
 
 const WINDOW_PREVIEW_SIZE = 128;
 
-const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
 const SETTING_KEY_SWITCH_WORKSPACE_BACKWARD = 'switch-workspace-backward';
 const SETTING_KEY_HIDE_EMPTY = 'hide-empty';
@@ -25,10 +23,10 @@ const SETTING_KEY_WORKSPACE_NAME = {
        4 : 'workspace4-name',
       };
 
-var WorkSpace = class WorkSpace {
-    constructor() {
-        this._settings = ExtensionUtils.getSettings(SCHEMA_NAME);
-        this._settingsMutter = ExtensionUtils.getSettings("org.gnome.mutter");
+class WorkSpace {
+    constructor(settings, settingsMutter) {
+        this._settings = settings;
+        this._settingsMutter = settingsMutter;
 
         this.addKeybinding();
 
@@ -46,6 +44,10 @@ var WorkSpace = class WorkSpace {
         this.dynamicWorkspace = this._settingsMutter.get_boolean('dynamic-workspaces');
         this.dynamicWorkspaceID = this._settingsMutter.connect('changed::' + 'dynamic-workspaces',
             () => { this.dynamicWorkspace = this._settingsMutter.get_boolean('dynamic-workspaces'); });
+    }
+
+    setPopupList(popupList) {
+        this.popupList = popupList;
     }
 
     getWorkspaceNumber() {
@@ -94,9 +96,9 @@ var WorkSpace = class WorkSpace {
     }
 
     _switchWorkspace(display, window, binding) {
-        popupList.update();
+        this.popupList.update();
 
-        let tabPopup = new WorkSpacePopup(this._keyBindingAction, this._keyBindingActionBackward);
+        let tabPopup = new WorkSpacePopup(this._keyBindingAction, this._keyBindingActionBackward, this.popupList, this);
 
         if (!tabPopup.show(binding.is_reversed(), binding.get_name(), binding.get_mask())) {
             tabPopup.destroy();
@@ -117,8 +119,9 @@ var WorkSpace = class WorkSpace {
     }
 };
 
-var PopupList = class PopupList {
-    constructor() {
+class PopupList {
+    constructor(workspace) {
+        this.workspace = workspace;
         this._popupList = [];
         this._workspaceChangedID = global.workspace_manager.connect('active-workspace-changed',
                                                                     this.update.bind(this));
@@ -128,7 +131,7 @@ var PopupList = class PopupList {
         let activeWs = global.workspace_manager.get_active_workspace();
         this._popupList.push(activeWs.index());
 
-        for (let i = 0; i < workspace.getWorkspaceNumber(); i++) {
+        for (let i = 0; i < this.workspace.getWorkspaceNumber(); i++) {
             if (i === activeWs.index())
                 continue;
             this._popupList.push(i);
@@ -146,7 +149,7 @@ var PopupList = class PopupList {
                 this.moveToTop(activeWsIndex);
             }
 
-            let numberWorkspace = workspace.getWorkspaceNumber();
+            let numberWorkspace = this.workspace.getWorkspaceNumber();
             if (this._popupList.length > numberWorkspace) {
                 let index = this._popupList.indexOf(numberWorkspace);
                 if (index > -1) {
@@ -180,13 +183,14 @@ var PopupList = class PopupList {
 
 var WorkSpacePopup = GObject.registerClass(
 class WorkSpacePopup extends SwitcherPopup.SwitcherPopup {
-    _init(action, actionBackward) {
+    _init(action, actionBackward, popupList, workspace) {
         super._init();
 
         this._action = action;
         this._actionBackward = actionBackward;
+        this.popupList = popupList;
 
-        this._switcherList = new WorkSpaceList();
+        this._switcherList = new WorkSpaceList(popupList, workspace);
         this._items = this._switcherList.icons;
     }
 
@@ -206,18 +210,17 @@ class WorkSpacePopup extends SwitcherPopup.SwitcherPopup {
     }
 
     _finish() {
+        super._finish();
         Main.wm.actionMoveWorkspace(this._switcherList.selectWorkspaces[this._selectedIndex]);
 
         let activeWs = global.workspace_manager.get_active_workspace();
-        popupList.moveToTop(activeWs.index());
-
-        super._finish();
+        this.popupList.moveToTop(activeWs.index());
     }
 });
 
 var WorkSpaceList = GObject.registerClass(
 class WorkSpaceList extends SwitcherPopup.SwitcherList {
-    _init() {
+    _init(popupList, workspace) {
         super._init(true);
 
         this._label = new St.Label({ x_align: Clutter.ActorAlign.CENTER,
@@ -234,7 +237,7 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
             let workspace_index = popup.pop();
             this.selectWorkspaces[i] = this.workspaces[workspace_index];
 
-            let icon = new WorkspaceIcon(Number(workspace_index));
+            let icon = new WorkspaceIcon(Number(workspace_index), workspace);
 
             this.addItem(icon, icon.label);
             this.icons.push(icon);
@@ -313,7 +316,7 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
 
 var WorkspaceIcon = GObject.registerClass(
 class WorkspaceIcon extends St.BoxLayout {
-    _init(workspace_index) {
+    _init(workspace_index, workspace) {
         super._init({ style_class: 'alt-tab-app',
                       vertical: true });
 
@@ -321,7 +324,6 @@ class WorkspaceIcon extends St.BoxLayout {
 
         this.connect('destroy', this._onDestroy.bind(this));
 
-        let settings = ExtensionUtils.getSettings(SCHEMA_NAME);
         let workspaceName = workspace.workspaceName[workspace_index + 1];
         if (workspaceName == null || workspaceName == '')
             workspaceName = "Workspace" + " " + String(workspace_index + 1);
@@ -420,21 +422,24 @@ class WorkspaceIcon extends St.BoxLayout {
     }
 });
 
-function init() {
-}
+export default class SwitchWorkspaceExtension extends Extension {
 
-let workspace;
-let popupList;
+    enable() {
+        this._settings = this.getSettings();
+        this._settingsMutter = this.getSettings("org.gnome.mutter");
+        this.workspace = new WorkSpace(this._settings, this._settingsMutter);
+        this.popupList = new PopupList(this.workspace);
+        this.workspace.setPopupList(this.popupList);
+    }
 
-function enable() {
-    workspace = new WorkSpace();
-    popupList = new PopupList();
-}
+    disable() {
+        this.workspace.destroy();
+        this.workspace = null;
 
-function disable() {
-    workspace.destroy();
-    workspace = null;
+        this.popupList.destroy();
+        this.popupList = null;
 
-    popupList.destroy();
-    popupList = null;
+        this._settings = null;
+        this._settingsMutter = null;
+    }
 }
