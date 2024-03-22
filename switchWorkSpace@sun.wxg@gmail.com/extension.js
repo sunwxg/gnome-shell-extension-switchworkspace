@@ -225,7 +225,7 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
 
         this._label = new St.Label({ x_align: Clutter.ActorAlign.CENTER,
                                      y_align: Clutter.ActorAlign.CENTER });
-        this.add_actor(this._label);
+        this.add_child(this._label);
 
         this.icons = [];
 
@@ -331,7 +331,7 @@ class WorkspaceIcon extends St.BoxLayout {
 
         this._icon = new St.Widget({ layout_manager: new Clutter.BinLayout() });
         this._icon.destroy_all_children();
-        this.add_actor(this._icon);
+        this.add_child(this._icon);
 
         let workArea = Main.layoutManager.getWorkAreaForMonitor(Main.layoutManager.primaryIndex);
         this._porthole = { width: workArea.width,
@@ -348,7 +348,7 @@ class WorkspaceIcon extends St.BoxLayout {
 
         this._createWindowThumbnail();
 
-        this._icon.add_actor(this._createNumberIcon(workspace_index + 1));
+        this._icon.add_child(this._createNumberIcon(workspace_index + 1));
         this._icon.set_size(windowSize, windowSize);
     }
 
@@ -366,14 +366,14 @@ class WorkspaceIcon extends St.BoxLayout {
         for (let i = 0; i < windows.length; i++) {
             if (this._isMyWindow(windows[i])) {
                 let clone = new WorkspaceThumbnail.WindowClone(windows[i]);
-                this._windowsThumbnail.add_actor(clone);
+                this._windowsThumbnail.add_child(clone);
             }
         }
 
         this._windowsThumbnail.set_size(this._porthole.width * this.scale,
                                         this._porthole.height * this.scale);
         this._windowsThumbnail.set_scale(this.scale, this.scale);
-        this._icon.add_actor(this._windowsThumbnail);
+        this._icon.add_child(this._windowsThumbnail);
     }
 
     _isMyWindow(actor) {
@@ -405,11 +405,11 @@ class WorkspaceIcon extends St.BoxLayout {
 
         let box = new St.BoxLayout({ style_class: 'number-window',
                                      vertical: true });
-        icon.add_actor(box);
+        icon.add_child(box);
 
         let label = new St.Label({ style_class: 'number-label',
                                    text: number.toString() });
-        box.add(label);
+        box.add_child(label);
 
         return icon;
     }
