@@ -6,7 +6,7 @@
   "name": "Switch Workspace",
   "description": "Switch workspace like using ALT+TAB key to switch windows \n\n Default shortcut key to switch workspace is Ctrl+Above_Tab .",
   "shell-version": [
-    "46"
+    "47"
   ],
   "original-authors": "sun.wxg@gmail.com",
   "url": "https://github.com/sunwxg/gnome-shell-extension-switchworkspace"
