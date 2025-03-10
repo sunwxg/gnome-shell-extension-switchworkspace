@@ -95,7 +95,7 @@ class WorkSpace {
         Main.wm.removeKeybinding(SETTING_KEY_SWITCH_WORKSPACE_BACKWARD);
     }
 
-    _switchWorkspace(display, window, binding) {
+    _switchWorkspace(display, window, event, binding) {
         this.popupList.update();
 
         let tabPopup = new WorkSpacePopup(this._keyBindingAction, this._keyBindingActionBackward, this.popupList, this);
