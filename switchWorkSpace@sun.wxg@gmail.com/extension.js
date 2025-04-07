@@ -16,12 +16,15 @@ const WINDOW_PREVIEW_SIZE = 128;
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
 const SETTING_KEY_SWITCH_WORKSPACE_BACKWARD = 'switch-workspace-backward';
 const SETTING_KEY_HIDE_EMPTY = 'hide-empty';
+const SETTING_KEY_HIDE_WORKSPACE_NUMBER = 'hide-workspace-number';
 const SETTING_KEY_WORKSPACE_NAME = {
        1 : 'workspace1-name',
        2 : 'workspace2-name',
        3 : 'workspace3-name',
        4 : 'workspace4-name',
       };
+
+let hideNumber = false;
 
 class WorkSpace {
     constructor(settings, settingsMutter) {
@@ -40,6 +43,10 @@ class WorkSpace {
         this.hideEmpty = this._settings.get_boolean(SETTING_KEY_HIDE_EMPTY);
         this.hideEmptyID = this._settings.connect('changed::' + SETTING_KEY_HIDE_EMPTY,
             () => { this.hideEmpty = this._settings.get_boolean(SETTING_KEY_HIDE_EMPTY); });
+
+        hideNumber = this._settings.get_boolean(SETTING_KEY_HIDE_WORKSPACE_NUMBER);
+        this.hideNumberID = this._settings.connect('changed::' + SETTING_KEY_HIDE_WORKSPACE_NUMBER,
+            () => { hideNumber = this._settings.get_boolean(SETTING_KEY_HIDE_WORKSPACE_NUMBER); });
 
         this.dynamicWorkspace = this._settingsMutter.get_boolean('dynamic-workspaces');
         this.dynamicWorkspaceID = this._settingsMutter.connect('changed::' + 'dynamic-workspaces',
@@ -114,6 +121,8 @@ class WorkSpace {
 
         if (this.hideEmptyID)
             this._settings.disconnect(this.hideEmptyID);
+        if (this.hideNumberID)
+            this._settings.disconnect(this.hideNumberID);
         if (this.dynamicWorkspaceID)
             this._settingsMutter.disconnect(this.dynamicWorkspaceID);
     }
@@ -376,7 +385,8 @@ class WorkspaceIcon extends St.BoxLayout {
 
         this._createWindowThumbnail();
 
-        this._icon.add_child(this._createNumberIcon(workspace_index + 1));
+        if (!hideNumber)
+            this._icon.add_child(this._createNumberIcon(workspace_index + 1));
     }
 
     _createWindowThumbnail() {

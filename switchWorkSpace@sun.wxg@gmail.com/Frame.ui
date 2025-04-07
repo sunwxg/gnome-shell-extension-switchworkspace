@@ -83,6 +83,36 @@
           </object>
         </child>
         <child>
+          <object class="GtkBox">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
+            <property name="margin_top">20</property>
+            <child>
+              <object class="GtkLabel">
+                <property name="hexpand">True</property>
+                <property name="halign">start</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Hide workspace number</property>
+                <attributes>
+                  <attribute name="weight" value="bold"/>
+                </attributes>
+              </object>
+            </child>
+            <child>
+              <object class="GtkSwitch" id="hide_workspace_number">
+                <property name="margin_start">6</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+              </object>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+        </child>
+        <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can_focus">False</property>

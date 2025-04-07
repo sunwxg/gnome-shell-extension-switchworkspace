@@ -30,6 +30,12 @@
       <description>
       </description>
     </key>
+    <key name="hide-workspace-number" type="b">
+      <default>false</default>
+      <summary>Key to hide workspace number</summary>
+      <description>
+      </description>
+    </key>
   </schema>
 </schemalist>
 

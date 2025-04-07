@@ -7,6 +7,7 @@ const SCHEMA_NAME = 'org.gnome.shell.extensions.switchWorkSpace';
 const SETTING_KEY_SWITCH_WORKSPACE = 'switch-workspace';
 const SETTING_KEY_SWITCH_WORKSPACE_BACKWARD = 'switch-workspace-backward';
 const SETTING_KEY_HIDE_EMPTY = 'hide-empty';
+const SETTING_KEY_HIDE_WORKSPACE_NUMBER = 'hide-workspace-number';
 const SETTING_KEY_WORKSPACE_NAME = {
        1 : 'workspace1-name',
        2 : 'workspace2-name',
@@ -33,6 +34,7 @@ var Frame = class Frame {
         bindings_box.append(this.keybindingBox());
 
         this.hideEmptyWorkspace();
+        this.hideWorkspaceNumber();
 
         for (let i in SETTING_KEY_WORKSPACE_NAME) {
             this.workspaceNameBinding(i);
@@ -51,6 +53,13 @@ var Frame = class Frame {
         button.active = this._settings.get_boolean(SETTING_KEY_HIDE_EMPTY);
         button.connect('notify::active', (button) => {
             this._settings.set_boolean(SETTING_KEY_HIDE_EMPTY, button.active); });
+    }
+
+    hideWorkspaceNumber() {
+        let button = this._builder.get_object('hide_workspace_number');
+        button.active = this._settings.get_boolean(SETTING_KEY_HIDE_WORKSPACE_NUMBER);
+        button.connect('notify::active', (button) => {
+            this._settings.set_boolean(SETTING_KEY_HIDE_WORKSPACE_NUMBER, button.active); });
     }
 
     keybindingBox() {
