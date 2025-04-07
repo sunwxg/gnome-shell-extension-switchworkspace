@@ -218,6 +218,18 @@ class WorkSpacePopup extends SwitcherPopup.SwitcherPopup {
     }
 });
 
+const SwitcherButton = GObject.registerClass(
+class SwitcherButton extends St.Button {
+    _init(square) {
+        super._init({
+            style_class: 'item-box',
+            reactive: true,
+        });
+
+        this._square = square;
+    }
+});
+
 var WorkSpaceList = GObject.registerClass(
 class WorkSpaceList extends SwitcherPopup.SwitcherList {
     _init(popupList, workspace) {
@@ -268,6 +280,22 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
         }
 
         return ws;
+    }
+
+    addItem(item, label) {
+        let bbox = new SwitcherButton(this._squareItems);
+
+        bbox.set_child(item);
+        this._list.add_child(bbox);
+
+        bbox.connect('clicked', () => this._onItemClicked(bbox));
+        bbox.connect('motion-event', () => this._onItemMotion(bbox));
+
+        bbox.label_actor = label;
+
+        this._items.push(bbox);
+
+        return bbox;
     }
 
     vfunc_get_preferred_height(forWidth) {
@@ -349,13 +377,10 @@ class WorkspaceIcon extends St.BoxLayout {
         this._createWindowThumbnail();
 
         this._icon.add_child(this._createNumberIcon(workspace_index + 1));
-        this._icon.set_size(windowSize, windowSize);
     }
 
     _createWindowThumbnail() {
         this._windowsThumbnail = new St.Widget({ 
-            x_expand: true,
-            y_expand: true,
             y_align:  Clutter.ActorAlign.CENTER });
 
         let windows = global.get_window_actors().filter(actor => {
@@ -370,8 +395,8 @@ class WorkspaceIcon extends St.BoxLayout {
             }
         }
 
-        this._windowsThumbnail.set_size(this._porthole.width * this.scale,
-                                        this._porthole.height * this.scale);
+        this._windowsThumbnail.set_size(Math.round(this._porthole.width * this.scale),
+                                        Math.round(this._porthole.height * this.scale));
         this._windowsThumbnail.set_scale(this.scale, this.scale);
         this._icon.add_child(this._windowsThumbnail);
     }
@@ -394,7 +419,10 @@ class WorkspaceIcon extends St.BoxLayout {
             container: this._backgroundGroup,
             monitorIndex: index,
             controlPosition: false,
+            useContentSize: false,
         });
+        this._backgroundGroup.set_size(Math.round(this._porthole.width * this.scale),
+                                        Math.round(this._porthole.height * this.scale));
     }
 
     _createNumberIcon(number) {
