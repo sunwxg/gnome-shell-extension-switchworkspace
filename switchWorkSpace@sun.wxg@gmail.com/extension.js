@@ -490,7 +490,7 @@ const WindowClone = GObject.registerClass({
 
         let index = global.display.get_primary_monitor();
         let monitor = global.display.get_monitor_geometry(index);
-        this.set_position(realWindow.x -monitor.x, realWindow.y - monitor.y);
+        this.set_position(realWindow.x -monitor.x, realWindow.y - monitor.y - Main.panel.height);
 
         this.add_child(clone);
     }
