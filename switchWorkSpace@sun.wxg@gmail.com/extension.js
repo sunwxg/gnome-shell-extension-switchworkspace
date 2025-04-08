@@ -390,8 +390,7 @@ class WorkspaceIcon extends St.BoxLayout {
     }
 
     _createWindowThumbnail() {
-        this._windowsThumbnail = new St.Widget({ 
-            y_align:  Clutter.ActorAlign.CENTER });
+        this._windowsThumbnail = new St.Widget();
 
         let windows = global.get_window_actors().filter(actor => {
             let win = actor.meta_window;
@@ -400,7 +399,7 @@ class WorkspaceIcon extends St.BoxLayout {
 
         for (let i = 0; i < windows.length; i++) {
             if (this._isMyWindow(windows[i])) {
-                let clone = new WorkspaceThumbnail.WindowClone(windows[i]);
+                let clone = new WindowClone(windows[i]);
                 this._windowsThumbnail.add_child(clone);
             }
         }
@@ -457,6 +456,43 @@ class WorkspaceIcon extends St.BoxLayout {
             this._bgManager.destroy();
             this._bgManager = null;
         }
+    }
+});
+
+const PrimaryActorLayout = GObject.registerClass(
+class PrimaryActorLayout extends Clutter.FixedLayout {
+    _init(primaryActor) {
+        super._init();
+
+        this.primaryActor = primaryActor;
+    }
+
+    vfunc_get_preferred_width(container, forHeight) {
+        return this.primaryActor.get_preferred_width(forHeight);
+    }
+
+    vfunc_get_preferred_height(container, forWidth) {
+        return this.primaryActor.get_preferred_height(forWidth);
+    }
+});
+
+const WindowClone = GObject.registerClass({
+}, class WindowClone extends Clutter.Actor {
+    _init(realWindow) {
+        let clone = new Clutter.Clone({
+            source: realWindow,
+        });
+        super._init({
+            layout_manager: new PrimaryActorLayout(clone),
+            reactive: true,
+        });
+        this._delegate = this;
+
+        let index = global.display.get_primary_monitor();
+        let monitor = global.display.get_monitor_geometry(index);
+        this.set_position(realWindow.x -monitor.x, realWindow.y - monitor.y);
+
+        this.add_child(clone);
     }
 });
 
