@@ -260,7 +260,7 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
 
             let icon = new WorkspaceIcon(Number(workspace_index), workspace);
 
-            this.addItem(icon, icon.label);
+            this.addItem(icon, icon.label, workspace_index);
             this.icons.push(icon);
         }
     }
@@ -291,10 +291,35 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
         return ws;
     }
 
-    addItem(item, label) {
-        let bbox = new SwitcherButton(this._squareItems);
+    _createNumberIcon(number) {
+        let icon = new St.Widget({ x_expand: true,
+                                   y_expand: true,
+                                   x_align:  Clutter.ActorAlign.END,
+                                   y_align:  Clutter.ActorAlign.END });
 
-        bbox.set_child(item);
+        let box = new St.BoxLayout({ style_class: 'number-window',
+                                     vertical: true });
+        icon.add_child(box);
+
+        let label = new St.Label({ style_class: 'number-label',
+                                   text: number.toString() });
+        box.add_child(label);
+
+        return icon;
+    }
+
+    addItem(item, label, workspace_index) {
+
+        let _icon = new St.Widget({ layout_manager: new Clutter.BinLayout(),
+                                    x_expand: true,
+                                    y_expand: true,
+        });
+        _icon.add_child(item);
+        if (!hideNumber)
+            _icon.add_child(this._createNumberIcon(workspace_index + 1));
+
+        let bbox = new SwitcherButton(this._squareItems);
+        bbox.set_child(_icon);
         this._list.add_child(bbox);
 
         bbox.connect('clicked', () => this._onItemClicked(bbox));
@@ -384,9 +409,6 @@ class WorkspaceIcon extends St.BoxLayout {
         this._createBackground(Main.layoutManager.primaryIndex);
 
         this._createWindowThumbnail();
-
-        if (!hideNumber)
-            this._icon.add_child(this._createNumberIcon(workspace_index + 1));
     }
 
     _createWindowThumbnail() {
@@ -432,23 +454,6 @@ class WorkspaceIcon extends St.BoxLayout {
         });
         this._backgroundGroup.set_size(Math.round(this._porthole.width * this.scale),
                                         Math.round(this._porthole.height * this.scale));
-    }
-
-    _createNumberIcon(number) {
-        let icon = new St.Widget({ x_expand: true,
-                                   y_expand: true,
-                                   x_align:  Clutter.ActorAlign.END,
-                                   y_align:  Clutter.ActorAlign.END });
-
-        let box = new St.BoxLayout({ style_class: 'number-window',
-                                     vertical: true });
-        icon.add_child(box);
-
-        let label = new St.Label({ style_class: 'number-label',
-                                   text: number.toString() });
-        box.add_child(label);
-
-        return icon;
     }
 
     _onDestroy() {
