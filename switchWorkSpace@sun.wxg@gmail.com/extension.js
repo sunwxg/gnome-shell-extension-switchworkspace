@@ -297,8 +297,7 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
                                    x_align:  Clutter.ActorAlign.END,
                                    y_align:  Clutter.ActorAlign.END });
 
-        let box = new St.BoxLayout({ style_class: 'number-window',
-                                     vertical: true });
+        let box = new St.BoxLayout({ style_class: 'number-window' });
         icon.add_child(box);
 
         let label = new St.Label({ style_class: 'number-label',
@@ -379,8 +378,7 @@ class WorkSpaceList extends SwitcherPopup.SwitcherList {
 var WorkspaceIcon = GObject.registerClass(
 class WorkspaceIcon extends St.BoxLayout {
     _init(workspace_index, workspace) {
-        super._init({ style_class: 'alt-tab-app',
-                      vertical: true });
+        super._init({ style_class: 'alt-tab-app' });
 
         this.metaWorkspace = global.workspace_manager.get_workspace_by_index(workspace_index);
 
